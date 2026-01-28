@@ -1,0 +1,30 @@
+{
+  "name": "nuxt-ui-template-starter",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare",
+    "lint": "eslint .",
+    "typecheck": "nuxt typecheck"
+  },
+  "dependencies": {
+    "@iconify-json/lucide": "^1.2.82",
+    "@iconify-json/simple-icons": "^1.2.63",
+    "@nuxt/ui": "^4.3.0",
+    "axios": "^1.13.2",
+    "nuxt": "^4.2.2",
+    "nuxt-charts": "2.0.0",
+    "nuxt-vue3-google-signin": "0.0.13"
+  },
+  "devDependencies": {
+    "@nuxt/eslint": "^1.12.1",
+    "@types/node": "^25.0.10",
+    "eslint": "^9.39.2",
+    "typescript": "^5.9.3",
+    "vue-tsc": "^3.2.1"
+  },
+  "packageManager": "pnpm@10.26.1"
+}
