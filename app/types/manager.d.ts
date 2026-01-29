@@ -1,5 +1,4 @@
 export interface ManagerMouthlyQueryParams {
-    employeeId: string;
     year: number;
 }
 

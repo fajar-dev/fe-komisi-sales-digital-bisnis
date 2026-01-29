@@ -1,5 +1,4 @@
 export interface ImplementatorMouthlyQueryParams {
-    employeeId: string;
     year: number;
 }
 
