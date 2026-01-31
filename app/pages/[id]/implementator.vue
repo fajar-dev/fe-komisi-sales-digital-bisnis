@@ -161,6 +161,7 @@
 </template>
 
 <script setup lang="ts">
+import { AdditionalService } from '~/services/additional'
 import { CommissionService } from '~/services/commission-service'
 import { EmployeeService } from '~/services/employee-service'
 import { InvoiceService } from '~/services/invoice'
@@ -350,6 +351,19 @@ const yFormatter = (tick: number) => tick.toString()
 const monthcard = ref<{ mounth: string; total: string }[]>([])
 
 const fetchData = async () => {
+    const additionalService = new AdditionalService()
+    const currentPeriod = await additionalService.getCurrentPeriod()
+
+    if (currentPeriod?.start && currentPeriod?.end) {
+        const [startYear, startMonth, startDay] = currentPeriod.start.split('-').map(Number) as [number, number, number]
+        const [endYear, endMonth, endDay] = currentPeriod.end.split('-').map(Number) as [number, number, number]
+        
+        modelValue.value = {
+            start: new CalendarDate(startYear, startMonth, startDay),
+            end: new CalendarDate(endYear, endMonth, endDay)
+        }
+    }
+
     const employeeService = new EmployeeService()
     const employeeData = await employeeService.getEmployee(route.params.id as string)
     employee.value = employeeData.data

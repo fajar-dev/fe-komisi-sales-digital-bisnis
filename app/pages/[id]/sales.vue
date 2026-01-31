@@ -263,15 +263,14 @@ const df = new DateFormatter('en-US', {
   dateStyle: 'medium'
 })
 
-const today = new Date()
 const modelValue = shallowRef({
-  start: new CalendarDate(today.getFullYear(), today.getMonth() + 1, 1),
-  end: new CalendarDate(today.getFullYear(), today.getMonth() + 1, today.getDate())
+    start: new CalendarDate(2026, 1, 1),
+    end: new CalendarDate(2026, 1, 31)
 })
-
 
 import { h, resolveComponent } from 'vue'
 import type { TableColumn } from '@nuxt/ui'
+import { AdditionalService } from '~/services/additional'
 
 const UBadge = resolveComponent('UBadge')
 
@@ -382,20 +381,20 @@ const colorMode = useColorMode()
 
 // Helper function untuk format currency
 const formatCurrency = (value: number): string => {
-  return new Intl.NumberFormat('id-ID', { 
-    style: 'currency', 
-    currency: 'IDR', 
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0 
-  }).format(value)
+    return new Intl.NumberFormat('id-ID', { 
+        style: 'currency', 
+        currency: 'IDR', 
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0 
+    }).format(value)
 }
 
 // Total Commission Donut Chart Data
 const totalCommissionDonutData = ref<number[]>([])
 
 const donutLabels = [
-  { name: 'Internal', color: '#3b82f6' },
-  { name: 'Resell', color: '#f97316' }
+    { name: 'Internal', color: '#3b82f6' },
+    { name: 'Resell', color: '#f97316' }
 ]
 
 const totalCommissionDonutChart: Record<string, BulletLegendItemInterface> = Object.fromEntries(
@@ -403,7 +402,7 @@ const totalCommissionDonutChart: Record<string, BulletLegendItemInterface> = Obj
 )
 
 const donutValueFormatter = (value: number): string => {
-  return formatCurrency(value)
+    return formatCurrency(value)
 }
 
 // Commission Chart Internal (Area Chart)
@@ -415,13 +414,13 @@ const commissionInternalData = ref<{
 }[]>([])
 
 const commissionInternalChart: Record<string, BulletLegendItemInterface> = {
-  solo: { name: 'Solo', color: '#3b82f6' },
-  booster: { name: 'Booster', color: '#22c55e' },
-  recurring: { name: 'Recurring', color: '#f97316' },
+    solo: { name: 'Solo', color: '#3b82f6' },
+    booster: { name: 'Booster', color: '#22c55e' },
+    recurring: { name: 'Recurring', color: '#f97316' },
 }
 
 const xFormatterCommissionInternal = (tick: number, _i?: number, _ticks?: number[]): string => {
-  return String(commissionInternalData.value[tick]?.date ?? '')
+    return String(commissionInternalData.value[tick]?.date ?? '')
 }
 
 // Commission Chart Resell (Area Chart)
@@ -434,18 +433,18 @@ const commissionResellData = ref<{
 }[]>([])
 
 const commissionResellChart: Record<string, BulletLegendItemInterface> = {
-  margin_high: { name: 'Margin ≥15%', color: '#3b82f6' },
-  margin_medium: { name: 'Margin 10-15%', color: '#22c55e' },
-  margin_low: { name: 'Margin <10%', color: '#f97316' },
-  recurring: { name: 'Recurring', color: '#8b5cf6' },
+    margin_high: { name: 'Margin ≥15%', color: '#3b82f6' },
+    margin_medium: { name: 'Margin 10-15%', color: '#22c55e' },
+    margin_low: { name: 'Margin <10%', color: '#f97316' },
+    recurring: { name: 'Recurring', color: '#8b5cf6' },
 }
 
 const xFormatterCommissionResell = (tick: number, _i?: number, _ticks?: number[]): string => {
-  return String(commissionResellData.value[tick]?.date ?? '')
+    return String(commissionResellData.value[tick]?.date ?? '')
 }
 
 const yFormatterCommission = (value: number): string => {
-  return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(value)
+    return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(value)
 }
 
 // Total Commission Chart (Line Chart)
@@ -463,7 +462,7 @@ const totalCommissionChart: Record<string, BulletLegendItemInterface> = {
 }
 
 const xFormatterTotalCommission = (tick: number, _i?: number, _ticks?: number[]): string => {
-  return String(totalCommissionData.value[tick]?.date ?? '')
+    return String(totalCommissionData.value[tick]?.date ?? '')
 }
 
 // Customer Chart Internal (Bar Chart)
@@ -475,9 +474,9 @@ const customerInternalData = ref<{
 }[]>([])
 
 const customerInternalChart = {
-  solo: { name: 'Solo', color: '#3b82f6' },
-  booster: { name: 'Booster', color: '#22c55e' },
-  recurring: { name: 'Recurring', color: '#f97316' },
+    solo: { name: 'Solo', color: '#3b82f6' },
+    booster: { name: 'Booster', color: '#22c55e' },
+    recurring: { name: 'Recurring', color: '#f97316' },
 }
 
 const xFormatterInternal = (i: number): string => `${customerInternalData.value[i]?.month}`
@@ -492,10 +491,10 @@ const customerResellData = ref<{
 }[]>([])
 
 const customerResellChart = {
-  margin_high: { name: 'Margin ≥15%', color: '#3b82f6' },
-  margin_medium: { name: 'Margin 10-15%', color: '#22c55e' },
-  margin_low: { name: 'Margin <10%', color: '#f97316' },
-  recurring: { name: 'Recurring', color: '#8b5cf6' },
+    margin_high: { name: 'Margin ≥15%', color: '#3b82f6' },
+    margin_medium: { name: 'Margin 10-15%', color: '#22c55e' },
+    margin_low: { name: 'Margin <10%', color: '#f97316' },
+    recurring: { name: 'Recurring', color: '#8b5cf6' },
 }
 
 const xFormatterResell = (i: number): string => `${customerResellData.value[i]?.month}`
@@ -506,6 +505,19 @@ const yFormatter = (tick: number) => tick.toString()
 const monthcard = ref<{ mounth: string; total: string }[]>([])
 
 const fetchData = async () => {
+    const additionalService = new AdditionalService()
+    const currentPeriod = await additionalService.getCurrentPeriod()
+
+    if (currentPeriod?.start && currentPeriod?.end) {
+        const [startYear, startMonth, startDay] = currentPeriod.start.split('-').map(Number) as [number, number, number]
+        const [endYear, endMonth, endDay] = currentPeriod.end.split('-').map(Number) as [number, number, number]
+        
+        modelValue.value = {
+            start: new CalendarDate(startYear, startMonth, startDay),
+            end: new CalendarDate(endYear, endMonth, endDay)
+        }
+    }
+    
     const employeeService = new EmployeeService()
     const employeeData = await employeeService.getEmployee(route.params.id as string)
     employee.value = employeeData.data
