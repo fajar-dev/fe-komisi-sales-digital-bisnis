@@ -156,13 +156,37 @@
             </UCard>
         </div>
         </div>
+
+        <div class="py-2">
+            <div class="grid grid-cols-1">
+                <UCard>
+                <template #header>
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h2>Team</h2>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">
+                            Team Commission
+                            </p>
+                        </div>
+                    </div>
+                </template>
+                    <UTable :data="teamData" :columns="teamColumns" class="flex-1" />
+                </UCard>
+            </div>
+        </div>
     </UContainer>
 </template>
 
 <script setup lang="ts">
 import { CommissionService } from '~/services/commission-service'
 import { EmployeeService } from '~/services/employee-service'
+import { TeamService } from '~/services/team'
 import type { Employee } from '~/types/employee'
+import type { ManagerTeamData } from '~/types/team'
+import { h, resolveComponent } from 'vue'
+import type { TableColumn } from '@nuxt/ui'
+
+const UAvatar = resolveComponent('UAvatar')
 
 const route = useRoute()
 const employee = ref<Employee>()  
@@ -214,6 +238,56 @@ const yFormatter = (tick: number) => tick.toString()
 // Month Card
 
 const monthcard = ref<{ mounth: string; total: string }[]>([])
+
+// Team Table
+const teamData = ref<ManagerTeamData[]>([])
+
+const teamColumns: TableColumn<ManagerTeamData>[] = [
+  {
+    accessorKey: 'name',
+    header: 'Name',
+    cell: ({ row }) => {
+       return h('div', { class: 'flex items-center gap-3' }, [
+           h(UAvatar, { src: row.original.photo_profile, alt: row.original.name }),
+           h('div', { class: 'flex flex-col' }, [
+               h('span', { class: 'text-sm font-medium text-gray-900 dark:text-white' }, row.original.name),
+               h('span', { class: 'text-xs text-gray-500 dark:text-gray-400' }, row.original.employee_id)
+           ])
+       ])
+    }
+  },
+  {
+    accessorKey: 'job_position',
+    header: 'Position',
+    cell: ({ row }) => {
+        return h('div', { class: 'flex flex-col' }, [
+            h('span', { class: 'text-sm font-medium' }, row.original.job_position),
+            h('span', { class: 'text-xs text-gray-500' }, row.original.organization_name)
+        ])
+    }
+  },
+   {
+    accessorKey: 'branch',
+    header: 'Branch'
+  },
+  {
+    accessorKey: 'totalCommission',
+    header: 'Total Commission',
+     meta: {
+        class: {
+            th: 'text-right',
+            td: 'text-right font-bold'
+        }
+    },
+    cell: ({ row }) => {
+        return new Intl.NumberFormat('id-ID', {
+            style: 'currency',
+            currency: 'IDR',
+            minimumFractionDigits: 0
+        }).format(row.getValue('totalCommission'))
+    }
+  }
+]
 
 const fetchData = async () => {
     const employeeService = new EmployeeService()
@@ -282,6 +356,10 @@ const fetchData = async () => {
         })
         return row
     })
+
+    const teamService = new TeamService()
+    const teamResponse = await teamService.getTeamCommission(route.params.id as string, { year: year.value })
+    teamData.value = teamResponse.data.data
 }
 
 watch(year, () => {
