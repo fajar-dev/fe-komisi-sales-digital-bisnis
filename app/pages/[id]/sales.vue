@@ -37,34 +37,72 @@
         </div>
 
         <div class="py-2">
-            <div class="grid grid-cols-1 md:grid-cols-1 gap-4">
-                <UCard>
-                <template #header>
+            <div class="grid grid-cols-12 gap-4">
+                <UCard class="col-span-12 md:col-span-4">
+                    <template #header>
+                    <h2>Total Commission</h2>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">
+                        Total Yearly Commission
+                    </p>
+                    </template>
+                    <DonutChart
+                        :data="totalCommissionDonutData"
+                        :height="280"
+                        :categories="totalCommissionDonutChart"
+                        :radius="80"
+                        :pad-angle="0.1"
+                        :arc-width="20"
+                        :value-formatter="donutValueFormatter"
+                    >
+                        <div class="text-center">
+                            <div class="text-sm text-gray-500 dark:text-gray-400">
+                                Total
+                            </div>
+                            <div class="text-2xl font-bold text-gray-900 dark:text-white">
+                                {{ formatCurrency(totalCommissionDonutData.reduce((a, b) => a + b, 0)) }}
+                            </div>
+                        </div>
+                    </DonutChart>
+                </UCard>
+
+                <!-- 8 kolom -->
+                <UCard class="col-span-12 md:col-span-8">
+                    <template #header>
                     <div class="lg:flex items-center justify-between">
                         <div>
-                            <h2>Monthly Commission</h2>
-                            <p class="text-sm text-gray-500 dark:text-gray-400">
-                                Total monthly commission
-                            </p>
+                        <h2>Monthly Commission</h2>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">
+                            Total monthly commission
+                        </p>
                         </div>
                         <div>
-                            <h1 class="font-bold text-2xl">Total: {{ new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(totalCommissionData.reduce((total, item) => total + item.total, 0)) }}</h1>
+                        <h1 class="font-bold text-2xl">
+                            Total:
+                            {{
+                            new Intl.NumberFormat('id-ID', {
+                                style: 'currency',
+                                currency: 'IDR',
+                                minimumFractionDigits: 0
+                            }).format(totalCommissionData.reduce((total, item) => total + item.total, 0))
+                            }}
+                        </h1>
                         </div>
                     </div>
-                </template>
-                     <LineChart
-                        :data="totalCommissionData"
-                        :height="280"
-                        y-label="Total Commission"
-                        :x-num-ticks="4"
-                        :y-num-ticks="4"
-                        :categories="totalCommissionChart"
-                        :x-formatter="xFormatterTotalCommission"
-                        :y-formatter="yFormatterCommission"
-                        :y-grid-line="true"
-                        :curve-type="CurveType.MonotoneX"
-                        :legend-position="LegendPosition.TopRight"
-                        :hide-legend="false"
+                    </template>
+
+                    <LineChart
+                    :data="totalCommissionData"
+                    :height="280"
+                    y-label="Total Commission"
+                    :x-num-ticks="4"
+                    :y-num-ticks="4"
+                    :categories="totalCommissionChart"
+                    :x-formatter="xFormatterTotalCommission"
+                    :y-formatter="yFormatterCommission"
+                    :y-grid-line="true"
+                    :curve-type="CurveType.MonotoneX"
+                    :legend-position="LegendPosition.TopRight"
+                    :hide-legend="false"
                     />
                 </UCard>
             </div>
@@ -171,13 +209,167 @@
             </UCard>
         </div>
         </div>
+
+        <div class="py-2">
+            <div class="grid grid-cols-1">
+                <UCard>
+                <template #header>
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h2>Invoice</h2>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">
+                            Invoice Sales
+                            </p>
+                        </div>
+                        <UPopover>
+                            <UButton color="neutral" variant="subtle" icon="i-lucide-calendar">
+                            <template v-if="modelValue.start">
+                                <template v-if="modelValue.end">
+                                {{ df.format(modelValue.start.toDate(getLocalTimeZone())) }} - {{ df.format(modelValue.end.toDate(getLocalTimeZone())) }}
+                                </template>
+
+                                <template v-else>
+                                {{ df.format(modelValue.start.toDate(getLocalTimeZone())) }}
+                                </template>
+                            </template>
+                            <template v-else>
+                                Pick a date
+                            </template>
+                            </UButton>
+
+                            <template #content>
+                            <UCalendar v-model="modelValue" class="p-2" :number-of-months="2" range />
+                            </template>
+                        </UPopover>
+                    </div>
+                </template>
+                    <UTable :data="data" :columns="columns" class="flex-1" />
+                </UCard>
+            </div>
+        </div>
     </UContainer>
 </template>
 
 <script setup lang="ts">
 import { CommissionService } from '~/services/commission-service'
 import { EmployeeService } from '~/services/employee-service'
+import { InvoiceService } from '~/services/invoice'
 import type { Employee } from '~/types/employee'
+import type { InvoiceSalesData } from '~/types/invoice'
+
+import { CalendarDate, DateFormatter, getLocalTimeZone } from '@internationalized/date'
+
+const df = new DateFormatter('en-US', {
+  dateStyle: 'medium'
+})
+
+const today = new Date()
+const modelValue = shallowRef({
+  start: new CalendarDate(today.getFullYear(), today.getMonth() + 1, 1),
+  end: new CalendarDate(today.getFullYear(), today.getMonth() + 1, today.getDate())
+})
+
+
+import { h, resolveComponent } from 'vue'
+import type { TableColumn } from '@nuxt/ui'
+
+const UBadge = resolveComponent('UBadge')
+
+const data = ref<InvoiceSalesData[]>([])
+
+const columns: TableColumn<InvoiceSalesData>[] = [
+    {
+        accessorKey: 'invoiceNumber',
+        header: 'Invoice Number',
+        meta: {
+        class: {
+            td: 'font-bold'
+        }
+        },
+        cell: ({ row }) => `#${row.getValue('invoiceNumber')}`
+    },
+    {
+        accessorKey: 'invoiceDate',
+        header: 'Invoice Date',
+        cell: ({ row }) => {
+        return new Date(row.getValue('invoiceDate')).toLocaleString('en-US', {
+            day: 'numeric',
+            month: 'short',
+            year: 'numeric'
+        })
+        }
+    },
+    {
+        id: 'status',
+        header: 'Status',
+        cell: ({ row }) => {
+        if (row.original.isNew) {
+            return h(UBadge, { color: 'success', variant: 'subtle' }, () => 'New')
+        }
+        if (row.original.isUpgrade) {
+            return h(UBadge, { color: 'warning', variant: 'subtle' }, () => 'Prorata')
+        }
+        if (row.original.isTermin) {
+            return h(UBadge, { color: 'warning', variant: 'subtle' }, () => 'Termin')
+        }
+        return h(UBadge, { color: 'info', variant: 'subtle' }, () => 'Recurring')
+        }
+    },
+    {
+        header: 'Service',
+        cell: ({ row }) => {
+        return h('div', { class: 'flex flex-col' }, [
+            h('span', { class: 'text-sm text-highlighted' }, row.original.serviceId + ' - ' + row.original.customerServiceId),
+            h('span', { class: 'text-sm' }, row.original.serviceName)
+        ])
+        }
+    },
+    {
+        header: 'Company',
+        cell: ({ row }) => {
+        return h('div', { class: 'flex flex-col' }, [
+            h('span', { class: 'text-sm text-highlighted' }, row.original.customerId),
+            h('span', { class: 'text-sm' }, row.original.customerCompany)
+        ])
+        }
+    },
+    {
+        accessorKey: 'dpp',
+        header: 'DPP',
+        meta: {
+        class: {
+            th: 'text-right',
+            td: 'text-right font-medium'
+        }
+        },
+        cell: ({ row }) => {
+        const amount = Number.parseFloat(row.getValue('dpp'))
+        return new Intl.NumberFormat('id-ID', {
+            style: 'currency',
+            currency: 'IDR'
+        }).format(amount)
+        }
+    },
+    {
+        header: 'Commission',
+        meta: {
+        class: {
+            th: 'text-right',
+            td: 'text-right font-medium'
+        }
+        },
+        cell: ({ row }) => {
+        return h('div', { class: 'flex flex-col' }, [
+            h('span', { class: 'text-sm text-highlighted' }, Intl.NumberFormat('id-ID', { style: 'decimal' }).format(row.original.salesCommissionPercentage) + '%'),
+            h('span', { class: 'text-sm' }, new Intl.NumberFormat('id-ID', {
+                style: 'currency',
+                currency: 'IDR'
+            }).format(row.original.salesCommission))
+        ])
+        }
+    }
+]
+
 
 const route = useRoute()
 const employee = ref<Employee>()  
@@ -187,6 +379,32 @@ const items = ref([2026, 2027, 2028, 2029, 2030])
 const year = ref(new Date().getFullYear())
 
 const colorMode = useColorMode()
+
+// Helper function untuk format currency
+const formatCurrency = (value: number): string => {
+  return new Intl.NumberFormat('id-ID', { 
+    style: 'currency', 
+    currency: 'IDR', 
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0 
+  }).format(value)
+}
+
+// Total Commission Donut Chart Data
+const totalCommissionDonutData = ref<number[]>([])
+
+const donutLabels = [
+  { name: 'Internal', color: '#3b82f6' },
+  { name: 'Resell', color: '#f97316' }
+]
+
+const totalCommissionDonutChart: Record<string, BulletLegendItemInterface> = Object.fromEntries(
+    donutLabels.map(i => [i.name, { name: i.name, color: i.color }])
+)
+
+const donutValueFormatter = (value: number): string => {
+  return formatCurrency(value)
+}
 
 // Commission Chart Internal (Area Chart)
 const commissionInternalData = ref<{
@@ -234,10 +452,14 @@ const yFormatterCommission = (value: number): string => {
 const totalCommissionData = ref<{
     date: string;
     total: number;
+    totalInternal: number;
+    totalResell: number;
 }[]>([])
 
 const totalCommissionChart: Record<string, BulletLegendItemInterface> = {
-    total: { name: 'Total Commission', color: '#10b981' },
+    total: { name: 'Total', color: '#10b981' },
+    totalInternal: { name: 'Internal', color: '#3b82f6' },
+    totalResell: { name: 'Resell', color: '#f97316' },
 }
 
 const xFormatterTotalCommission = (tick: number, _i?: number, _ticks?: number[]): string => {
@@ -291,6 +513,12 @@ const fetchData = async () => {
     const commissionService = new CommissionService()
     const data = await commissionService.salesCommission(route.params.id as string, { year: year.value })
     
+    // Donut Chart Data - Internal vs Resell (array of numbers)
+    totalCommissionDonutData.value = [
+        data.data.totalInternal ?? 0,
+        data.data.totalResell ?? 0
+    ]
+    
     // Month Card
     monthcard.value = data.data.data.map((item) => ({
         mounth: item.month,
@@ -323,11 +551,16 @@ const fetchData = async () => {
         }
     })
     
-    // Total Commission Data
-    totalCommissionData.value = data.data.data.map((item) => ({
-        date: item.month,
-        total: item.total
-    }))
+    // Total Commission Data (Updated untuk include totalInternal & totalResell)
+    totalCommissionData.value = data.data.data.map((item) => {
+        const detail = item.detail?.[0]
+        return {
+            date: item.month,
+            total: detail?.total ?? 0,
+            totalInternal: detail?.totalInternal ?? 0,
+            totalResell: detail?.totalResell ?? 0
+        }
+    })
     
     // Customer Data Internal
     customerInternalData.value = data.data.data.map((item) => {
@@ -356,12 +589,28 @@ const fetchData = async () => {
     })
 }
 
+const fetchInvoiceData = async () => {
+    if (!modelValue.value.start || !modelValue.value.end) return
+
+    const invoiceService = new InvoiceService()
+    const invoiceData = await invoiceService.getInvoiceSales(route.params.id as string, {
+        startDate: modelValue.value.start.toString(),
+        endDate: modelValue.value.end.toString()
+    })
+    data.value = invoiceData.data.data
+}
+
 watch(year, () => {
     fetchData()
 })
 
+watch(modelValue, () => {
+    fetchInvoiceData()
+})
+
 onMounted(() => {
     fetchData()
+    fetchInvoiceData()
 })
 
 </script>

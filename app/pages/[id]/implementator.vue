@@ -119,13 +119,165 @@
             </UCard>
         </div>
         </div>
+
+        <div class="py-2">
+            <div class="grid grid-cols-1">
+                <UCard>
+                <template #header>
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h2>Invoice</h2>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">
+                            Invoice Sales
+                            </p>
+                        </div>
+                        <UPopover>
+                            <UButton color="neutral" variant="subtle" icon="i-lucide-calendar">
+                            <template v-if="modelValue.start">
+                                <template v-if="modelValue.end">
+                                {{ df.format(modelValue.start.toDate(getLocalTimeZone())) }} - {{ df.format(modelValue.end.toDate(getLocalTimeZone())) }}
+                                </template>
+
+                                <template v-else>
+                                {{ df.format(modelValue.start.toDate(getLocalTimeZone())) }}
+                                </template>
+                            </template>
+                            <template v-else>
+                                Pick a date
+                            </template>
+                            </UButton>
+
+                            <template #content>
+                            <UCalendar v-model="modelValue" class="p-2" :number-of-months="2" range />
+                            </template>
+                        </UPopover>
+                    </div>
+                </template>
+                    <UTable :data="invoiceData" :columns="columns" class="flex-1" />
+                </UCard>
+            </div>
+        </div>
     </UContainer>
 </template>
 
 <script setup lang="ts">
 import { CommissionService } from '~/services/commission-service'
 import { EmployeeService } from '~/services/employee-service'
+import { InvoiceService } from '~/services/invoice'
 import type { Employee } from '~/types/employee'
+import type { InvoiceImplementatorData } from '~/types/invoice'
+
+import { CalendarDate, DateFormatter, getLocalTimeZone } from '@internationalized/date'
+
+const df = new DateFormatter('en-US', {
+  dateStyle: 'medium'
+})
+
+const today = new Date()
+const modelValue = shallowRef({
+  start: new CalendarDate(today.getFullYear(), today.getMonth() + 1, 1),
+  end: new CalendarDate(today.getFullYear(), today.getMonth() + 1, today.getDate())
+})
+
+import { h, resolveComponent } from 'vue'
+import type { TableColumn } from '@nuxt/ui'
+
+const UBadge = resolveComponent('UBadge')
+
+const invoiceData = ref<InvoiceImplementatorData[]>([])
+
+const columns: TableColumn<InvoiceImplementatorData>[] = [
+    {
+        accessorKey: 'invoiceNumber',
+        header: 'Invoice Number',
+        meta: {
+        class: {
+            td: 'font-bold'
+        }
+        },
+        cell: ({ row }) => `#${row.getValue('invoiceNumber')}`
+    },
+    {
+        accessorKey: 'invoiceDate',
+        header: 'Invoice Date',
+        cell: ({ row }) => {
+        return new Date(row.getValue('invoiceDate')).toLocaleString('en-US', {
+            day: 'numeric',
+            month: 'short',
+            year: 'numeric'
+        })
+        }
+    },
+    {
+        id: 'status',
+        header: 'Status',
+        cell: ({ row }) => {
+        if (row.original.isNew) {
+            return h(UBadge, { color: 'success', variant: 'subtle' }, () => 'New')
+        }
+        if (row.original.isUpgrade) {
+            return h(UBadge, { color: 'warning', variant: 'subtle' }, () => 'Prorata')
+        }
+        if (row.original.isTermin) {
+            return h(UBadge, { color: 'warning', variant: 'subtle' }, () => 'Termin')
+        }
+        return h(UBadge, { color: 'info', variant: 'subtle' }, () => 'Recurring')
+        }
+    },
+    {
+        header: 'Service',
+        cell: ({ row }) => {
+        return h('div', { class: 'flex flex-col' }, [
+            h('span', { class: 'text-sm text-highlighted' }, row.original.serviceId + ' - ' + row.original.customerServiceId),
+            h('span', { class: 'text-sm' }, row.original.serviceName)
+        ])
+        }
+    },
+    {
+        header: 'Company',
+        cell: ({ row }) => {
+        return h('div', { class: 'flex flex-col' }, [
+            h('span', { class: 'text-sm text-highlighted' }, row.original.customerId),
+            h('span', { class: 'text-sm' }, row.original.customerCompany)
+        ])
+        }
+    },
+    {
+        accessorKey: 'dpp',
+        header: 'DPP',
+        meta: {
+        class: {
+            th: 'text-right',
+            td: 'text-right font-medium'
+        }
+        },
+        cell: ({ row }) => {
+        const amount = Number.parseFloat(row.getValue('dpp'))
+        return new Intl.NumberFormat('id-ID', {
+            style: 'currency',
+            currency: 'IDR'
+        }).format(amount)
+        }
+    },
+    {
+        header: 'Commission',
+        meta: {
+        class: {
+            th: 'text-right',
+            td: 'text-right font-medium'
+        }
+        },
+        cell: ({ row }) => {
+        return h('div', { class: 'flex flex-col' }, [
+            h('span', { class: 'text-sm text-highlighted' }, Intl.NumberFormat('id-ID', { style: 'decimal' }).format(row.original.implementatorCommissionPercentage) + '%'),
+            h('span', { class: 'text-sm' }, new Intl.NumberFormat('id-ID', {
+                style: 'currency',
+                currency: 'IDR'
+            }).format(row.original.implementatorCommission))
+        ])
+        }
+    }
+]
 
 const route = useRoute()
 const employee = ref<Employee>()  
@@ -234,7 +386,23 @@ const fetchData = async () => {
             recurring: recurring?.count ?? 0,
         }
     })
+
 }
+
+const fetchInvoiceData = async () => {
+    if (!modelValue.value.start || !modelValue.value.end) return
+
+    const invoiceService = new InvoiceService()
+    const response = await invoiceService.getInvoiceImplementator(route.params.id as string, {
+        startDate: modelValue.value.start.toString(),
+        endDate: modelValue.value.end.toString()
+    })
+    invoiceData.value = response.data.data
+}
+
+watch(modelValue, () => {
+    fetchInvoiceData()
+})
 
 watch(year, () => {
     fetchData()
@@ -242,6 +410,7 @@ watch(year, () => {
 
 onMounted(() => {
     fetchData()
+    fetchInvoiceData()
 })
 
 </script>

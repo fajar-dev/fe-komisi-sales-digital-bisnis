@@ -74,10 +74,28 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <UCard>
             <template #header>
-                <h2>Commission</h2>
-                <p class="text-sm text-gray-500 dark:text-gray-400">
-                Sales Commission
-                </p>
+                <div class="space-y-3">
+                    <div>
+                        <h2>Commission</h2>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">
+                            Sales Commission
+                        </p>
+                    </div>
+                    <!-- Custom Legend -->
+                    <div class="flex flex-wrap gap-x-4 gap-y-2">
+                        <div 
+                            v-for="(item, key) in commissionChart" 
+                            :key="key"
+                            class="flex items-center gap-1.5"
+                        >
+                            <div 
+                                :style="`background-color: ${item.color}`"
+                                class="w-3 h-3 rounded-sm flex-shrink-0"
+                            />
+                            <span class="text-xs text-gray-700 dark:text-gray-300">{{ item.name }}</span>
+                        </div>
+                    </div>
+                </div>
             </template>
                 <AreaChart
                     v-if="Object.keys(commissionChart).length > 0"
@@ -89,18 +107,36 @@
                     :x-formatter="xFormatterCommission"
                     :y-formatter="yFormatterCommission"
                     :curve-type="CurveType.MonotoneX"
-                    :legend-position="LegendPosition.TopRight"
-                    :hide-legend="false"
+                    :hide-legend="true"
                     :y-grid-line="true"
                     :x-grid-line="false"
                 />
             </UCard>
+            
             <UCard>
             <template #header>
-                <h2>Customer</h2>
-                <p class="text-sm text-gray-500 dark:text-gray-400">
-                Customer Count
-                </p>
+                <div class="space-y-3">
+                    <div>
+                        <h2>Customer</h2>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">
+                            Customer Count
+                        </p>
+                    </div>
+                    <!-- Custom Legend -->
+                    <div class="flex flex-wrap gap-x-4 gap-y-2">
+                        <div 
+                            v-for="(item, key) in customerChart" 
+                            :key="key"
+                            class="flex items-center gap-1.5"
+                        >
+                            <div 
+                                :style="`background-color: ${item.color}`"
+                                class="w-3 h-3 rounded-sm flex-shrink-0"
+                            />
+                            <span class="text-xs text-gray-700 dark:text-gray-300">{{ item.name }}</span>
+                        </div>
+                    </div>
+                </div>
             </template>
                 <BarChart
                     v-if="barChartYAxis.length > 0"
@@ -114,8 +150,7 @@
                     :radius="4"
                     :x-formatter="xFormatter"
                     :y-formatter="yFormatter"
-                    :legend-position="LegendPosition.TopRight"
-                    :hide-legend="false"
+                    :hide-legend="true"
                     :y-grid-line="true"
                 />
             </UCard>
