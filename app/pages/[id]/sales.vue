@@ -636,9 +636,7 @@ watch(modelValue, () => {
     fetchInvoiceData()
 })
 
-onMounted(() => {
-    fetchData()
-    fetchInvoiceData()
-})
+fetchData()
+fetchInvoiceData()
 
 </script>

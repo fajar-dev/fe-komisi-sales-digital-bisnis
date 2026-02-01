@@ -438,9 +438,7 @@ watch(year, () => {
     fetchData()
 })
 
-onMounted(() => {
-    fetchData()
-    fetchInvoiceData()
-})
+fetchData()
+fetchInvoiceData()
 
 </script>

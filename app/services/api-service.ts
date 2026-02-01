@@ -26,7 +26,7 @@ export class ApiService {
 
             if (error.response?.status === 403) {
                 if (typeof window !== 'undefined') {
-                    window.location.href = '/'
+                    navigateTo('/')
                 }
             }
 
@@ -53,7 +53,7 @@ export class ApiService {
                 localStorage.removeItem('accessToken')
                 localStorage.removeItem('refreshToken')
                 localStorage.removeItem('user')
-                window.location.href = '/sign-in'
+                navigateTo('/sign-in')
             }
             }
             return Promise.reject(error)

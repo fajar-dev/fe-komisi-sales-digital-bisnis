@@ -373,8 +373,6 @@ watch(year, () => {
     fetchData()
 })
 
-onMounted(() => {
-    fetchData()
-})
+fetchData()
 
 </script>
