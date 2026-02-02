@@ -166,7 +166,6 @@ import { CommissionService } from '~/services/commission-service'
 import { EmployeeService } from '~/services/employee-service'
 import { InvoiceService } from '~/services/invoice'
 import type { Employee } from '~/types/employee'
-import type { InvoiceImplementatorData } from '~/types/invoice'
 
 import { CalendarDate, DateFormatter, getLocalTimeZone } from '@internationalized/date'
 
@@ -182,6 +181,7 @@ const modelValue = shallowRef({
 
 import { h, resolveComponent } from 'vue'
 import type { TableColumn } from '@nuxt/ui'
+import type { InvoiceImplementatorData } from '~/types/implementator'
 
 const UBadge = resolveComponent('UBadge')
 
@@ -269,12 +269,24 @@ const columns: TableColumn<InvoiceImplementatorData>[] = [
         }
     },
     {
+        header: 'Month Period',
+        meta: {
+            class: {
+                th: 'text-right',
+                td: 'text-right font-medium'
+            }
+        },
+        cell: ({ row }) => {
+        return row.original.monthPeriod
+        }
+    },
+    {
         header: 'Commission',
         meta: {
-        class: {
-            th: 'text-right',
-            td: 'text-right font-medium'
-        }
+            class: {
+                th: 'text-right',
+                td: 'text-right font-medium'
+            }
         },
         cell: ({ row }) => {
         return h('div', { class: 'flex flex-col' }, [
