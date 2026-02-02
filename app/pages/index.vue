@@ -74,8 +74,9 @@ const greeting = computed(() => {
 })
 
 const fetchEmployeeCard = async () => {
+    if (!authState.user?.employee_id) return
     const employeeService = new EmployeeService()
-    const data = await employeeService.getEmployeeHierarchy(authState.user?.employee_id ?? '')
+    const data = await employeeService.getEmployeeHierarchy(authState.user?.employee_id)
     employeeCard.value = data.data.map((item) => {
         return {
             photoProfile: item.photo_profile,
@@ -89,6 +90,10 @@ const fetchEmployeeCard = async () => {
     })
 }
 
-fetchEmployeeCard()
+watch(() => authState.user, (user) => {
+    if (user?.employee_id) {
+        fetchEmployeeCard()
+    }
+}, { immediate: true })
 
 </script>

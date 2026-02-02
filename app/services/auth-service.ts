@@ -21,8 +21,19 @@ export class AuthService {
     const accessToken = localStorage.getItem(this.ACCESS_TOKEN_KEY)
     
     if (accessToken) {
+      this.token.value = accessToken
+
+      // Try to restore user from local storage immediately to avoid flickering
+      const userJson = localStorage.getItem(this.USER_KEY)
+      if (userJson) {
+        try {
+          this.user.value = JSON.parse(userJson)
+        } catch (e) {
+          console.error('Failed to parse user from local storage', e)
+        }
+      }
+
       try {
-        this.token.value = accessToken
         const response = await apiService.client.get<{ success: boolean, data: User }>('/auth/me', {
           headers: {
             Authorization: `Bearer ${accessToken}`
