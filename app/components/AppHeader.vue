@@ -55,26 +55,26 @@
 </template>
 
 <script setup lang="ts">
-  import type { DropdownMenuItem } from '@nuxt/ui'
-  const { state: authState, service: authService } = useAuth()
-  const toast = useToast()
+    import type { DropdownMenuItem } from '@nuxt/ui'
+    const { state: authState, service: authService } = useAuth()
+    const toast = useToast()
 
-  const handleLogout = async () => {
-    await authService.logout()
-    toast.add({ title: 'Logged out successfully' })
-    navigateTo('/sign-in')
-  }
+    const handleLogout = async () => {
+        await authService.logout()
+        toast.add({ title: 'Logged out successfully' })
+        navigateTo('/sign-in')
+    }
 
-  const items = computed<DropdownMenuItem[]>(() => [
-    {
-      label: 'Sign Out',
-      icon: 'i-lucide-log-out',
-      onSelect: handleLogout
-    },
-  ])
+    const items = computed<DropdownMenuItem[]>(() => [
+        {
+        label: 'Sign Out',
+        icon: 'i-lucide-log-out',
+        onSelect: handleLogout
+        },
+    ])
 
-const toolbar = defineModel<boolean>('toolbar', {
-  type: Boolean,
-  default: false
-})
+    const toolbar = defineModel<boolean>('toolbar', {
+        type: Boolean,
+        default: false
+    })
 </script>

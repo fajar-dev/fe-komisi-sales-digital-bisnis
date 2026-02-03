@@ -302,27 +302,48 @@ const columns: TableColumn<InvoiceSalesData>[] = [
         }
     },
     {
-        id: 'status',
-        header: 'Status',
+        id: 'label',
+        header: 'Label',
         cell: ({ row }) => {
-        if (row.original.isNew) {
-            return h(UBadge, { color: 'success', variant: 'subtle' }, () => 'New')
-        }
-        if (row.original.isUpgrade) {
-            return h(UBadge, { color: 'warning', variant: 'subtle' }, () => 'Prorata')
-        }
-        if (row.original.isTermin) {
-            return h(UBadge, { color: 'warning', variant: 'subtle' }, () => 'Termin')
-        }
-        else {
-            if(row.original.typeSub == 'flex')
-                return h(UBadge, { color: 'info', variant: 'solid' }, () => 'Flex')
-            if(row.original.typeSub == 'annual_yearly')
-                return h(UBadge, { color: 'success', variant: 'solid' }, () => 'Annual Yearly')
+            const badges = []
+            
+            if (row.original.isNew) {
+                badges.push({ label: 'New', color: 'success', variant: 'subtle' })
             }
-            if(row.original.typeSub == 'annual_monthly')
-                return h(UBadge, { color: 'neutral', variant: 'solid' }, () => 'Annual Monthly')
-            return h(UBadge, { color: 'info', variant: 'subtle' }, () => 'Recurring')
+            if (row.original.isUpgrade) {
+                badges.push({ label: 'Prorata', color: 'warning', variant: 'subtle' })
+            }
+            if (row.original.isTermin) {
+                badges.push({ label: 'Termin', color: 'warning', variant: 'subtle' })
+            }
+
+            if(!row.original.isNew && !row.original.isUpgrade && !row.original.isTermin) {
+                badges.push({ label: 'Recurring', color: 'info', variant: 'subtle' })
+            }
+
+            if (row.original.typeSub === 'flex') {
+                badges.push({ label: 'Flex', color: 'info', variant: 'soft' })
+            } else if (row.original.typeSub === 'annual_yearly') {
+                badges.push({ label: 'Annual Yearly', color: 'success', variant: 'soft' })
+            } else if (row.original.typeSub === 'annual_monthly') {
+                badges.push({ label: 'Annual Monthly', color: 'neutral', variant: 'soft' })
+            }
+            
+            if(row.original.type === 'internal') {
+                badges.push({ label: 'Internal', color: 'primary', variant: 'outline' })
+            }
+
+            if(row.original.type === 'resell') {
+                badges.push({ label: 'Resell', color: 'info', variant: 'outline' })
+            }
+
+            if(row.original.isAdjustment) {
+                badges.push({ label: 'Adjustment', color: 'danger', variant: 'solid' })
+            }
+
+            return h('div', { class: 'flex gap-1 flex-wrap' }, badges.map(badge => 
+                h(UBadge, { color: badge.color, variant: badge.variant, size: 'md' }, () => badge.label)
+            ))
         }
     },
     {
