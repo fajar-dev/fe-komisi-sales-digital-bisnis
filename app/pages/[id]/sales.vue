@@ -294,14 +294,33 @@ const UButton = resolveComponent('UButton')
 const UDropdownMenu = resolveComponent('UDropdownMenu')
 
 
-const data = ref<InvoiceSalesData[]>([])
-const responseData = ref<InvoiceSalesResponseData['data']>({ data: [], totalCommission: 0, totalDpp: 0 })
+    import { authService } from '~/services/auth-service'
 
-const zeroCommissionCount = computed(() => {
-    return data.value.filter(item => Number(item.salesCommission) === 0).length
-})
+    const route = useRoute()
+    const data = ref<InvoiceSalesData[]>([])
+    const responseData = ref<InvoiceSalesResponseData['data']>({ data: [], totalCommission: 0, totalDpp: 0 })
 
-const columns: TableColumn<InvoiceSalesData>[] = [
+    const zeroCommissionCount = computed(() => {
+        return data.value.filter(item => Number(item.salesCommission) === 0).length
+    })
+
+    const getRowItems = (row: Row<InvoiceSalesData>) => {
+        const items: DropdownMenuItem[] = [
+            {
+                label: 'Adjust Commission',
+                icon: 'i-lucide-edit',
+                size: 'xs',
+                onClick: () => {
+                     invoiceAi.value = row.original.ai
+                    isAdjustmentModalOpen.value = true
+                }
+            }
+        ]
+        return items
+    }
+
+    const columns = computed<TableColumn<InvoiceSalesData>[]>(() => {
+        const cols: TableColumn<InvoiceSalesData>[] = [
     {
         accessorKey: 'invoiceNumber',
         header: 'Invoice Number',
@@ -456,45 +475,36 @@ const columns: TableColumn<InvoiceSalesData>[] = [
                 currency: 'IDR'
             }).format(responseData.value.totalCommission ?? 0))
         }
-    },
-    {
-    id: 'actions',
-    cell: ({ row }) => {
-        return h(
-            'div',
-            { class: 'text-right' },
-            h(
-            UDropdownMenu,
-            { content: { align: 'end' }, items: getRowItems(row) },
-            () =>
-                h(UButton, {
-                icon: 'i-lucide-ellipsis-vertical',
-                color: 'neutral',
-                variant: 'ghost',
-                class: 'ml-auto'
-                })
-            )
-        )
-        }
     }
 ]
 
-const getRowItems = (row: Row<InvoiceSalesData>) => {
-    const items: DropdownMenuItem[] = [
-        {
-            label: 'Adjust Commission',
-            icon: 'i-lucide-edit',
-            size: 'xs',
-            onClick: () => {
-                 invoiceAi.value = row.original.ai
-                isAdjustmentModalOpen.value = true
+    if (authService.user.value?.employee_id === route.params.id) {
+        cols.push({
+            id: 'actions',
+            cell: ({ row }) => {
+                return h(
+                    'div',
+                    { class: 'text-right' },
+                    h(
+                    UDropdownMenu,
+                    { content: { align: 'end' }, items: getRowItems(row) },
+                    () =>
+                        h(UButton, {
+                        icon: 'i-lucide-ellipsis-vertical',
+                        color: 'neutral',
+                        variant: 'ghost',
+                        class: 'ml-auto'
+                        })
+                    )
+                )
             }
-        }
-    ]
-    return items
-}
+        })
+    }
 
-const route = useRoute()
+    return cols
+})
+
+
 const employee = ref<Employee>()  
 
 // Year Select
