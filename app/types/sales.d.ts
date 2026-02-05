@@ -81,6 +81,7 @@ export interface InvoiceSalesData {
     salesCommission: number;
     isAdjustment: boolean;
     type:string
+    modal: number
     typeSub:string
     salesCommissionPercentage: number;
     isDeleted: boolean;

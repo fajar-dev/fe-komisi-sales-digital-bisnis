@@ -25,75 +25,73 @@
             }"
           />
 
-        <UForm
-            :schema="schema"
-            :state="formData"
-            class="space-y-3"
-            @submit="onSubmit"
-        >
-            <UFormField name="isDeleted" label="Delete Data">
-                <div class="flex items-center gap-2">
-                    <USwitch v-model="formData.isDeleted" />
-                    <span class="text-sm text-gray-500">Enable to soft delete/hide this invoice</span>
-                </div>
-            </UFormField>
+      <UForm
+          :schema="schema"
+          :state="formData"
+          class="space-y-3"
+          @submit="onSubmit"
+      >
+          <UFormField v-if="isResell" name="modal" label="Modal (HPP)" class="col-span-3">
+              <UInput v-model.number="formData.modal" type="number" class="w-full">
+                  <template #leading>
+                      <span class="text-gray-500 text-sm">Rp.</span>
+                  </template>
+              </UInput>
+          </UFormField>
 
-            <template v-if="!formData.isDeleted">
+          <div class="grid grid-cols-12 gap-4">
+              <UFormField name="percentage" label="Percentage (%)" required class="col-span-4">
+                  <USelect 
+                      v-if="isInternal"
+                      v-model.number="formData.percentage" 
+                      :items="percentageOptions" 
+                      class="w-full" 
+                  />
+                  <UInput 
+                      v-else
+                      v-model.number="formData.percentage" 
+                      type="number" 
+                      class="w-full" 
+                      readonly
+                  />
+              </UFormField>
 
-                <div class="grid grid-cols-10 gap-2">
-                  <UFormField name="paidDate" label="Paid Date" required class="col-span-7">
-                      <UInput v-model="formData.paidDate" type="date" class="w-full" />
-                  </UFormField>
-                  <UFormField name="monthPeriod" label="Month Period" required class="col-span-3">
-                      <UInput v-model="formData.monthPeriod" type="number" class="w-full" />
-                  </UFormField>
-                </div>
+              <UFormField name="commission" label="Commission" required class="col-span-8">
+                  <UInput v-model.number="formData.commission" type="number" class="w-full" readonly>
+                      <template #leading>
+                          <span class="text-gray-500 text-sm">Rp.</span>
+                      </template>
+                  </UInput>
+              </UFormField>
+          </div>
 
-                <div class="grid grid-cols-10 gap-2">
-                    <UFormField name="percentage" label="Percentage (%)" required class="col-span-3">
-                        <USelect 
-                            v-model.number="formData.percentage" 
-                            :items="percentageOptions" 
-                            class="w-full" 
-                        />
-                    </UFormField>
-                    <UFormField name="commission" label="Commission" required class="col-span-7">
-                        <UInput v-model.number="formData.commission" type="number" class="w-full" >
-                            <template #leading>
-                                <span class="text-gray-500 text-sm">Rp.</span>
-                            </template>
-                        </UInput>
-                    </UFormField>
-                </div>
+          <UFormField label="Note" name="note" required>
+              <UTextarea
+                  v-model="formData.note"
+                  class="w-full"
+                  placeholder="Reason..."
+                  :rows="3"
+              />
+          </UFormField>
 
-            </template>
+          <div class="flex justify-end gap-2">
+              <UButton
+                  label="Cancel"
+                  color="neutral"
+                  variant="subtle"
+                  :disabled="saving"
+                  @click="emit('update:open', false)"
+              />
+              <UButton
+                  label="Submit"
+                  color="primary"
+                  variant="solid"
+                  type="submit"
+                  :loading="saving"
+              />
+          </div>
+      </UForm>
 
-            <UFormField label="Note" name="note" required>
-                <UTextarea
-                    v-model="formData.note"
-                    class="w-full"
-                    placeholder="Reason..."
-                    :rows="3"
-                />
-            </UFormField>
-
-            <div class="flex justify-end gap-2">
-            <UButton
-                label="Cancel"
-                color="neutral"
-                variant="subtle"
-                :disabled="saving"
-                @click="emit('update:open', false)"
-            />
-            <UButton
-                label="Save"
-                color="primary"
-                variant="solid"
-                type="submit"
-                :loading="saving"
-            />
-            </div>
-        </UForm>
       </div>
     </template>
   </UModal>
@@ -121,35 +119,25 @@ const route = useRoute()
 const employeeId = route.params.id as string
 
 const schema = z.object({
-  isDeleted: z.boolean(),
-  paidDate: z.string().optional(),
-  monthPeriod: z.number().optional(),
-  percentage: z.number().optional(),
-  commission: z.number().optional(),
-  note: z.string().min(1, 'Note is required')
-}).superRefine((data, ctx) => {
-  if (!data.isDeleted) {
-    if (!data.paidDate) ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Paid Date is required", path: ["paidDate"] })
-    if (!data.monthPeriod) ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Month Period is required", path: ["monthPeriod"] })
-    if (data.percentage === undefined || data.percentage === null) ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Percentage is required", path: ["percentage"] })
-    if (data.commission === undefined || data.commission === null) ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Commission is required", path: ["commission"] })
-  }
+  percentage: z.number(),
+  commission: z.number(),
+  note: z.string().min(1, 'Note is required'),
+  modal: z.number().optional()
 })
 
 type Schema = z.output<typeof schema>
 
 const formData = reactive({
-  isDeleted: false,
-  paidDate: undefined as string | undefined,
-  monthPeriod: undefined as number | undefined,
   percentage: 0 as number | undefined,
   commission: 0 as number | undefined,
   note: '',
+  modal: 0 as number | undefined
 })
 
 const saving = ref(false)
 const loading = ref(false)
 const isInitializing = ref(false)
+const initialPercentage = ref(0)
 const invoiceData = ref<InvoiceSalesData | null>(null)
 
 async function loadInvoiceData() {
@@ -161,23 +149,15 @@ async function loadInvoiceData() {
   if (response?.data) {
      invoiceData.value = response.data
      const data = response.data as any
-     
-     let formattedDate = undefined
-     if (data.paidDate) {
-        const date = new Date(data.paidDate)
-        if (!isNaN(date.getTime())) {
-            formattedDate = date.toISOString().split('T')[0]
-        }
-     }
 
      isInitializing.value = true
+     initialPercentage.value = data.salesCommissionPercentage ?? 0
+     
      Object.assign(formData, {
-      isDeleted: !!data.isDeleted,
-      monthPeriod: data.monthPeriod,
-      paidDate: formattedDate,
-      percentage: Math.round(data.salesCommissionPercentage ?? 0),
-      commission: Math.round(data.salesCommission ?? 0),
+      percentage: data.salesCommissionPercentage ? Number(data.salesCommissionPercentage) : 0,
+      commission: data.salesCommission ? Number(data.salesCommission) : 0,
       note: data.adjustmentNote || '',
+      modal: data.modal ? Number(data.modal) : 0
     })
     nextTick(() => {
       isInitializing.value = false
@@ -188,9 +168,38 @@ async function loadInvoiceData() {
 
 watch(() => formData.percentage, (newVal) => {
   if (isInitializing.value) return
-  if (!formData.isDeleted && newVal !== undefined && invoiceData.value?.dpp) {
-      formData.commission = Math.round((invoiceData.value.dpp * newVal) / 100)
+  if (newVal !== undefined && invoiceData.value?.dpp) {
+      const dpp = Number(invoiceData.value.dpp)
+      formData.commission = (dpp * newVal) / 100
   }
+})
+watch(() => formData.modal, (newModal) => {
+    if (isInitializing.value) return
+    if (!isResell.value || !invoiceData.value?.dpp) return
+
+    // Jika default percentage sudah 0.5 (Recurring), jangan ubah
+    if (initialPercentage.value === 0.5) return
+    
+    const dpp = Number(invoiceData.value.dpp)
+    const modal = newModal || 0
+    
+    // Calculate Margin: (Modal - DPP) / Modal * 100
+    // If modal is 0, treat as < 10% margin category (2.5% commission)
+    let margin = 0
+    if (modal > 0 && dpp > 0) {
+        margin = ((modal - dpp) / modal) * 100
+    }
+    
+    let newPercentage = 0
+    if (margin >= 15) {
+        newPercentage = 5
+    } else if (margin >= 10 && margin < 15) {
+        newPercentage = 4
+    } else {
+        newPercentage = 2.5
+    }
+    
+    formData.percentage = newPercentage
 })
 
 watch(
@@ -208,13 +217,20 @@ watch(
 
 function resetForm() {
   Object.assign(formData, {
-    isDeleted: false,
-    paidDate: undefined,
     percentage: 0,
     commission: 0,
     note: '',
+    modal: 0
   })
 }
+
+const isResell = computed(() => {
+    return String((invoiceData.value as any)?.type || '').toLowerCase().trim().includes('resell')
+})
+
+const isInternal = computed(() => {
+    return String((invoiceData.value as any)?.type || '').toLowerCase().trim().includes('internal')
+})
 
 const percentageOptions = computed(() => {
   const defaults = [12, 15, 1, 5, 4, 2.5, 0.4]
@@ -235,26 +251,18 @@ async function onSubmit(_event: FormSubmitEvent<Schema>) {
   const adjustmentService = new AdjustmentService()
 
   const oldValue = {
-      paidDate: invoiceData.value.paidDate ? new Date(invoiceData.value.paidDate).toISOString().split('T')[0] : null,
-      monthPeriod: invoiceData.value.monthPeriod,
-      salesCommissionPercentage: Math.round(invoiceData.value.salesCommissionPercentage ?? 0),
-      salesCommission: Math.round(invoiceData.value.salesCommission ?? 0),
+      salesCommissionPercentage: Number(invoiceData.value.salesCommissionPercentage ?? 0),
+      salesCommission: Number(invoiceData.value.salesCommission ?? 0),
+      modal: Number((invoiceData.value as any).modal ?? 0),
   }
 
   const newValue = {
-          paidDate: formData.paidDate,
-          monthPeriod: formData.monthPeriod,
           salesCommissionPercentage: formData.percentage,
           salesCommission: formData.commission,
+          modal: formData.modal ?? 0,
   }
   
-  let action: 'update' | 'delete' = 'update'
-
-  if (formData.isDeleted) {
-      action = 'delete'
-  } else {
-      action = 'update'
-  }
+  const action = 'update'
 
   await adjustmentService.createAdjustment({
       ai: props.ai,
