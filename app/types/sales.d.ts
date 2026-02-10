@@ -44,7 +44,12 @@ export interface InvoiceSalesResponseData {
     success: boolean;
     message: string;
     data: {
-        data: InvoiceSalesData[];
+        newResellData: InvoiceSalesData[];
+        newResellTotalCommission: number;
+        newResellTotalDpp: number;
+        otherData: InvoiceSalesData[];
+        otherTotalCommission: number;
+        otherTotalDpp: number;
         totalCommission: number;
         totalDpp: number;
     };
@@ -58,6 +63,7 @@ export interface InvoiceSalesShowResponseData {
 
 export interface InvoiceSalesData {
     ai: number;
+    counter: number;
     invoiceNumber: number;
     position: number;
     invoiceDate: string;
@@ -82,7 +88,6 @@ export interface InvoiceSalesData {
     isAdjustment: boolean;
     type:string
     modal: number
-    typeSub:string
     salesCommissionPercentage: number;
     isDeleted: boolean;
 }

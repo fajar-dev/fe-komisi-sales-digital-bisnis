@@ -232,12 +232,16 @@
                         </UPopover>
                     </div>
                 </template>
-                    <UTable sticky :data="data" :columns="columns" class="flex-1 max-h-[800px] [&_tr:has(.commission-zero)]:bg-yellow-50 dark:[&_tr:has(.commission-zero)]:bg-yellow-950/20 [&_tr:has(.row-deleted)]:bg-red-50 dark:[&_tr:has(.row-deleted)]:bg-red-950/20" />
-                    <div class="p-4 border-t border-gray-200 dark:border-gray-800" v-if="zeroCommissionCount > 0">
-                        <p class="text-sm text-yellow-500 font-medium">
-                            {{ zeroCommissionCount }} invoice doesn't have commission
-                        </p>
+                    <div class="px-4 pb-4">
+                        <h3 class="font-semibold text-lg mb-2">New Resell</h3>
+                        <UTable sticky :data="responseData.newResellData" :columns="newResellColumns" class="flex-1 max-h-[600px] mb-8 [&_tr:has(.row-deleted)]:bg-red-50 dark:[&_tr:has(.row-deleted)]:bg-red-950/20" />
+                        
+                        <UDivider class="my-6" />
+
+                        <h3 class="font-semibold text-lg mb-2">Other Invoices</h3>
+                        <UTable sticky :data="responseData.otherData" :columns="otherColumns" class="flex-1 max-h-[600px] [&_tr:has(.row-deleted)]:bg-red-50 dark:[&_tr:has(.row-deleted)]:bg-red-950/20" />
                     </div>
+
                 </UCard>
             </div>
         </div>
@@ -278,29 +282,18 @@ const UDropdownMenu = resolveComponent('UDropdownMenu')
     import { authService } from '~/services/auth-service'
 
     const route = useRoute()
-    const data = ref<InvoiceSalesData[]>([])
-    const responseData = ref<InvoiceSalesResponseData['data']>({ data: [], totalCommission: 0, totalDpp: 0 })
-
-    const zeroCommissionCount = computed(() => {
-        return data.value.filter(item => Number(item.salesCommission) === 0).length
+    const responseData = ref<InvoiceSalesResponseData['data']>({ 
+        newResellData: [], 
+        newResellTotalCommission: 0, 
+        newResellTotalDpp: 0, 
+        otherData: [], 
+        otherTotalCommission: 0, 
+        otherTotalDpp: 0, 
+        totalCommission: 0, 
+        totalDpp: 0 
     })
 
-    const getRowItems = (row: Row<InvoiceSalesData>) => {
-        const items: DropdownMenuItem[] = [
-            {
-                label: 'Adjust Commission',
-                icon: 'i-lucide-edit',
-                size: 'xs',
-                onClick: () => {
-                     invoiceAi.value = row.original.ai
-                    isAdjustmentModalOpen.value = true
-                }
-            }
-        ]
-        return items
-    }
-
-    const columns = computed<TableColumn<InvoiceSalesData>[]>(() => {
+    const createColumns = (isNewResell: boolean) => {
         const cols: TableColumn<InvoiceSalesData>[] = [
     {
         accessorKey: 'invoiceNumber',
@@ -349,14 +342,6 @@ const UDropdownMenu = resolveComponent('UDropdownMenu')
             if(!row.original.isNew && !row.original.isUpgrade && !row.original.isTermin) {
                 badges.push({ label: 'Recurring', color: 'info', variant: 'subtle' })
             }
-
-            if (row.original.typeSub === 'flex') {
-                badges.push({ label: 'Flex', color: 'info', variant: 'soft' })
-            } else if (row.original.typeSub === 'annual_yearly') {
-                badges.push({ label: 'Annual Yearly', color: 'success', variant: 'soft' })
-            } else if (row.original.typeSub === 'annual_monthly') {
-                badges.push({ label: 'Annual Monthly', color: 'neutral', variant: 'soft' })
-            }
             
             if(row.original.type === 'internal') {
                 badges.push({ label: 'Internal', color: 'primary', variant: 'outline' })
@@ -383,17 +368,25 @@ const UDropdownMenu = resolveComponent('UDropdownMenu')
         header: 'Service',
         cell: ({ row }) => {
         return h('div', { class: 'flex flex-col' }, [
-            h('span', { class: 'text-sm text-highlighted' }, row.original.serviceId + ' - ' + row.original.customerServiceId),
-            h('span', { class: 'text-sm' }, row.original.serviceName)
+            h('a', { 
+                href: `https://isx.nusa.net.id/v2/customer/service/${row.original.customerServiceId}/detail`,
+                target: '_blank',
+                class: ['text-blue-500 hover:underline font-semibold', row.original.isDeleted ? 'row-deleted' : '']
+            }, row.original.customerServiceId),
+            h('span', { class: 'text-sm whitespace-normal break-words' }, row.original.serviceName)
         ])
         }
     },
     {
-        header: 'Company',
+        header: 'Customer',
         cell: ({ row }) => {
         return h('div', { class: 'flex flex-col' }, [
-            h('span', { class: 'text-sm text-highlighted' }, row.original.customerId),
-            h('span', { class: 'text-sm' }, row.original.customerCompany)
+            h('a', { 
+                href: `https://isx.nusa.net.id/customer.php?custId=${row.original.customerId}&pid=profile`,
+                target: '_blank',
+                class: ['text-blue-500 hover:underline font-semibold', row.original.isDeleted ? 'row-deleted' : '']
+            }, row.original.customerId),
+            h('span', { class: 'text-sm whitespace-normal break-words' }, row.original.customerCompany)
         ])
         }
     },
@@ -414,14 +407,18 @@ const UDropdownMenu = resolveComponent('UDropdownMenu')
         }).format(amount)
         },
         footer: () => {
+             const amount = isNewResell 
+                ? responseData.value.newResellTotalDpp 
+                : responseData.value.otherTotalDpp
+
             return h('div', { class: 'text-right font-bold' }, new Intl.NumberFormat('id-ID', {
                 style: 'currency',
                 currency: 'IDR'
-            }).format(responseData.value.totalDpp ?? 0))
+            }).format(amount ?? 0))
         }
     },
     {
-        header: 'Month Period',
+        header: 'Month',
         meta: {
             class: {
                 th: 'text-right',
@@ -433,6 +430,18 @@ const UDropdownMenu = resolveComponent('UDropdownMenu')
         }
     },
     {
+        header: 'Invoice Number',
+        meta: {
+            class: {
+                th: 'text-right',
+                td: 'text-right font-medium'
+            }
+        },
+        cell: ({ row }) => {
+        return row.original.counter
+        }
+    },
+    {
         header: 'Commission',
         meta: {
         class: {
@@ -441,8 +450,7 @@ const UDropdownMenu = resolveComponent('UDropdownMenu')
         }
         },
         cell: ({ row }) => {
-        const isZero = Number(row.original.salesCommission) === 0
-        return h('div', { class: ['flex flex-col', isZero ? 'commission-zero' : ''] }, [
+        return h('div', { class: 'flex flex-col' }, [
             h('span', { class: 'text-sm text-highlighted' }, Intl.NumberFormat('id-ID', { style: 'decimal' }).format(row.original.salesCommissionPercentage) + '%'),
             h('span', { class: 'text-sm' }, new Intl.NumberFormat('id-ID', {
                 style: 'currency',
@@ -451,39 +459,45 @@ const UDropdownMenu = resolveComponent('UDropdownMenu')
         ])
         },
         footer: () => {
+            const amount = isNewResell 
+                ? responseData.value.newResellTotalCommission 
+                : responseData.value.otherTotalCommission
+            
             return h('div', { class: 'text-right font-bold' }, new Intl.NumberFormat('id-ID', {
                 style: 'currency',
                 currency: 'IDR'
-            }).format(responseData.value.totalCommission ?? 0))
+            }).format(amount ?? 0))
         }
     }
 ]
 
-    if (authService.user.value?.employee_id === route.params.id) {
+    if (isNewResell && authService.user.value?.employee_id === route.params.id) {
         cols.push({
             id: 'actions',
             cell: ({ row }) => {
                 return h(
                     'div',
                     { class: 'text-right' },
-                    h(
-                    UDropdownMenu,
-                    { content: { align: 'end' }, items: getRowItems(row) },
-                    () =>
-                        h(UButton, {
-                        icon: 'i-lucide-ellipsis-vertical',
+                    h(UButton, {
+                        icon: 'i-lucide-edit',
                         color: 'neutral',
                         variant: 'ghost',
-                        class: 'ml-auto'
-                        })
-                    )
+                        class: 'ml-auto',
+                        onClick: () => {
+                            invoiceAi.value = row.original.ai
+                            isAdjustmentModalOpen.value = true
+                        }
+                    })
                 )
             }
         })
     }
 
     return cols
-})
+}
+
+const newResellColumns = computed(() => createColumns(true))
+const otherColumns = computed(() => createColumns(false))
 
 
 const employee = ref<Employee>()  
@@ -535,7 +549,7 @@ const commissionInternalChart: Record<string, BulletLegendItemInterface> = {
 }
 
 const xFormatterCommissionInternal = (tick: number, _i?: number, _ticks?: number[]): string => {
-    return String(commissionInternalData.value[tick]?.date ?? '')
+    return commissionInternalData.value[tick]?.date ?? ''
 }
 
 // Commission Chart Resell (Area Chart)
@@ -555,7 +569,7 @@ const commissionResellChart: Record<string, BulletLegendItemInterface> = {
 }
 
 const xFormatterCommissionResell = (tick: number, _i?: number, _ticks?: number[]): string => {
-    return String(commissionResellData.value[tick]?.date ?? '')
+    return commissionResellData.value[tick]?.date ?? ''
 }
 
 const yFormatterCommission = (value: number): string => {
@@ -577,7 +591,7 @@ const totalCommissionChart: Record<string, BulletLegendItemInterface> = {
 }
 
 const xFormatterTotalCommission = (tick: number, _i?: number, _ticks?: number[]): string => {
-    return String(totalCommissionData.value[tick]?.date ?? '')
+    return totalCommissionData.value[tick]?.date ?? ''
 }
 
 // Customer Chart Internal (Bar Chart)
@@ -594,7 +608,7 @@ const customerInternalChart = {
     recurring: { name: 'Recurring', color: '#f97316' },
 }
 
-const xFormatterInternal = (i: number): string => `${customerInternalData.value[i]?.month}`
+const xFormatterInternal = (i: number): string => customerInternalData.value[i]?.month ?? ''
 
 // Customer Chart Resell (Bar Chart)
 const customerResellData = ref<{
@@ -612,7 +626,7 @@ const customerResellChart = {
     recurring: { name: 'Recurring', color: '#8b5cf6' },
 }
 
-const xFormatterResell = (i: number): string => `${customerResellData.value[i]?.month}`
+const xFormatterResell = (i: number): string => customerResellData.value[i]?.month ?? ''
 
 const yFormatter = (tick: number) => tick.toString()
 
@@ -664,7 +678,7 @@ const fetchData = async () => {
             booster: booster?.total ?? 0,
             recurring: recurring?.total ?? 0,
         }
-    })
+    }).filter(item => (item.solo + item.booster + item.recurring) > 0)
     
     // Commission Data Resell
     commissionResellData.value = data.data.data.map((item) => {
@@ -676,7 +690,7 @@ const fetchData = async () => {
             margin_low: detail?.resell?.[2]?.total ?? 0,
             recurring: detail?.resell?.[3]?.total ?? 0,
         }
-    })
+    }).filter(item => (item.margin_high + item.margin_medium + item.margin_low + item.recurring) > 0)
     
     // Total Commission Data (Updated untuk include totalInternal & totalResell)
     totalCommissionData.value = data.data.data.map((item) => {
@@ -687,7 +701,7 @@ const fetchData = async () => {
             totalInternal: detail?.totalInternal ?? 0,
             totalResell: detail?.totalResell ?? 0
         }
-    })
+    }).filter(item => item.total > 0)
     
     // Customer Data Internal
     customerInternalData.value = data.data.data.map((item) => {
@@ -701,7 +715,7 @@ const fetchData = async () => {
             booster: booster?.count ?? 0,
             recurring: recurring?.count ?? 0,
         }
-    })
+    }).filter(item => (item.solo + item.booster + item.recurring) > 0)
     
     // Customer Data Resell
     customerResellData.value = data.data.data.map((item) => {
@@ -713,7 +727,7 @@ const fetchData = async () => {
             margin_low: detail?.resell?.[2]?.count ?? 0,
             recurring: detail?.resell?.[3]?.count ?? 0,
         }
-    })
+    }).filter(item => (item.margin_high + item.margin_medium + item.margin_low + item.recurring) > 0)
 }
 
 const fetchInvoiceData = async () => {
@@ -725,7 +739,6 @@ const fetchInvoiceData = async () => {
         endDate: modelValue.value.end.toString()
     })
     responseData.value = response.data
-    data.value = response.data.data
 }
 
 watch(year, () => {

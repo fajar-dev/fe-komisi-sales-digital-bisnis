@@ -188,7 +188,7 @@ const commissionChart = ref<Record<string, BulletLegendItemInterface>>({})
 const colorMode = useColorMode()
 
 const xFormatterCommission = (tick: number, _i?: number, _ticks?: number[]): string => {
-    return String(commissionData.value[tick]?.date ?? '')
+    return commissionData.value[tick]?.date ?? ''
 }
 
 const yFormatterCommission = (value: number): string => {
@@ -207,7 +207,7 @@ const totalCommissionChart: Record<string, BulletLegendItemInterface> = {
 }
 
 const xFormatterTotalCommission = (tick: number, _i?: number, _ticks?: number[]): string => {
-  return String(totalCommissionData.value[tick]?.date ?? '')
+  return totalCommissionData.value[tick]?.date ?? ''
 }
 
 // Customer Chart (Bar Chart)
@@ -216,7 +216,7 @@ const customerData = ref<any[]>([])
 const customerChart = ref<Record<string, BulletLegendItemInterface>>({})
 const barChartYAxis = ref<string[]>([])
 
-const xFormatter = (i: number): string => `${customerData.value[i]?.month}`
+const xFormatter = (i: number): string => customerData.value[i]?.month ?? ''
 const yFormatter = (tick: number) => tick.toString()
 
 // Month Card
@@ -317,36 +317,47 @@ const fetchData = async () => {
     customerChart.value = newChartConfig
     barChartYAxis.value = yAxisKeys
 
-    commissionData.value = data.data.data.map(item => {
-        const row: any = { date: item.month }
+    // Generate Commission Data
+    const rawCommissionData = data.data.data.map(item => {
+        const row: any = { date: item.month, total: 0 } // Add total tracking
         yAxisKeys.forEach(key => row[key] = 0)
         
         item.detail.forEach(d => {
             const key = d.name.toLowerCase().replace(/[^a-z0-9]/g, '_')
-            if (yAxisKeys.includes(key)) {
-                row[key] = d.total
+            if (newChartConfig[key]) { // Use config to check valid keys
+                 row[key] = d.total
+                 row.total += d.total
             }
         })
         return row
     })
+    
+    // Filter out rows with 0 total
+    commissionData.value = rawCommissionData.filter((row: any) => row.total > 0)
 
+    // Generate Total Commission Data
     totalCommissionData.value = data.data.data.map((item) => ({
         date: item.month,
         total: item.total
-    }))
+    })).filter(item => item.total > 0)
 
-    customerData.value = data.data.data.map(item => {
-        const row: any = { month: item.month }
+    // Generate Customer Data
+    const rawCustomerData = data.data.data.map(item => {
+        const row: any = { month: item.month, total: 0 }
         yAxisKeys.forEach(key => row[key] = 0)
         
         item.detail.forEach(d => {
             const key = d.name.toLowerCase().replace(/[^a-z0-9]/g, '_')
-            if (yAxisKeys.includes(key)) {
-                row[key] = d.count
+             if (newChartConfig[key]) {
+                 row[key] = d.count
+                 row.total += d.count
             }
         })
         return row
     })
+    
+    // Filter out rows with 0 total count
+    customerData.value = rawCustomerData.filter((row: any) => row.total > 0)
 
     const teamService = new TeamService()
     const teamResponse = await teamService.getTeamCommission(route.params.id as string, { year: year.value })

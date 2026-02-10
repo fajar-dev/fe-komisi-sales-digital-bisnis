@@ -17,7 +17,7 @@
           <UAlert
             color="warning"
             variant="subtle"
-            description="Data changes may affect the commission of the Implementator and Sales Manager."
+            description="Data changes may affect the commission of the Sales Manager."
             icon="i-lucide-alert-triangle"
             size="xs"
             :ui="{
@@ -31,33 +31,66 @@
           class="space-y-3"
           @submit="onSubmit"
       >
-          <UFormField v-if="isResell" name="modal" label="Modal (HPP)" class="col-span-3">
+        <div class="grid grid-cols-2 gap-4">
+           <UFormField name="price" label="Resale Price (1 License)" required>
+              <UInput v-model.number="formData.price" type="number" class="w-full">
+                  <template #leading>
+                      <span class="text-gray-500 text-sm">Rp.</span>
+                  </template>
+              </UInput>
+          </UFormField>
+          <UFormField name="modal" label="Modal (1 License)" required>
               <UInput v-model.number="formData.modal" type="number" class="w-full">
                   <template #leading>
                       <span class="text-gray-500 text-sm">Rp.</span>
                   </template>
               </UInput>
           </UFormField>
+        </div>
 
+        <div class="grid grid-cols-12 gap-4">
+              <UFormField name="margin" label="Margin (%)" required class="col-span-4">
+                  <UInput 
+                      v-model.number="formData.margin" 
+                      type="number" 
+                      class="w-full" 
+                      color="neutral"
+                      variant="subtle"
+                      readonly
+                  />
+              </UFormField>
+
+              <UFormField name="markup" label="Markup" required class="col-span-8">
+                  <UInput :model-value="formData.markup" type="number" class="w-full" color="neutral" variant="subtle" readonly>
+                      <template #leading>
+                          <span class="text-gray-500 text-sm">Rp.</span>
+                      </template>
+                  </UInput>
+              </UFormField>
+          </div>
+
+          <UFormField name="dpp" label="DPP" required>
+            <UInput :model-value="invoiceData ? Number(invoiceData.dpp) : 0" type="number" class="w-full" color="neutral" variant="subtle" readonly>
+                <template #leading>
+                    <span class="text-gray-500 text-sm">Rp.</span>
+                </template>
+            </UInput>
+        </UFormField>
+        
           <div class="grid grid-cols-12 gap-4">
               <UFormField name="percentage" label="Percentage (%)" required class="col-span-4">
-                  <USelect 
-                      v-if="isInternal"
-                      v-model.number="formData.percentage" 
-                      :items="percentageOptions" 
-                      class="w-full" 
-                  />
                   <UInput 
-                      v-else
                       v-model.number="formData.percentage" 
                       type="number" 
                       class="w-full" 
+                      color="neutral"
+                      variant="subtle"
                       readonly
                   />
               </UFormField>
 
               <UFormField name="commission" label="Commission" required class="col-span-8">
-                  <UInput v-model.number="formData.commission" type="number" class="w-full" readonly>
+                  <UInput v-model.number="formData.commission" type="number" class="w-full" color="neutral" variant="subtle" readonly>
                       <template #leading>
                           <span class="text-gray-500 text-sm">Rp.</span>
                       </template>
@@ -105,6 +138,8 @@ import { useRoute } from 'vue-router'
 import type { InvoiceSalesData } from '~/types/sales'
 import { AdjustmentService } from '~/services/adjustment-service'
 
+const toast = useToast()
+
 const props = defineProps<{
   ai: number
   open: boolean
@@ -122,7 +157,9 @@ const schema = z.object({
   percentage: z.number(),
   commission: z.number(),
   note: z.string().min(1, 'Note is required'),
-  modal: z.number().optional()
+  modal: z.number().optional(),
+  price: z.number().optional(),
+  margin: z.number().optional()
 })
 
 type Schema = z.output<typeof schema>
@@ -131,7 +168,10 @@ const formData = reactive({
   percentage: 0 as number | undefined,
   commission: 0 as number | undefined,
   note: '',
-  modal: 0 as number | undefined
+  modal: 0 as number | undefined,
+  price: 0 as number | undefined,
+  margin: 0 as number | undefined,
+  markup: 0 as number | undefined
 })
 
 const saving = ref(false)
@@ -153,11 +193,24 @@ async function loadInvoiceData() {
      isInitializing.value = true
      initialPercentage.value = data.salesCommissionPercentage ?? 0
      
+     const price = data.price ? Number(data.price) : 0
+     const modal = data.modal ? Number(data.modal) : 0
+     const markup = price - modal
+
+     let margin = 0
+     if (price > 0) {
+         margin = ((price - modal) / price) * 100
+     }
+     margin = Number(margin.toFixed(2))
+
      Object.assign(formData, {
       percentage: data.salesCommissionPercentage ? Number(data.salesCommissionPercentage) : 0,
       commission: data.salesCommission ? Number(data.salesCommission) : 0,
-      note: data.adjustmentNote || '',
-      modal: data.modal ? Number(data.modal) : 0
+      note: '',
+      modal,
+      price,
+      margin,
+      markup
     })
     nextTick(() => {
       isInitializing.value = false
@@ -173,23 +226,25 @@ watch(() => formData.percentage, (newVal) => {
       formData.commission = (dpp * newVal) / 100
   }
 })
-watch(() => formData.modal, (newModal) => {
-    if (isInitializing.value) return
-    if (!isResell.value || !invoiceData.value?.dpp) return
 
-    // Jika default percentage sudah 0.5 (Recurring), jangan ubah
-    if (initialPercentage.value === 0.5) return
+watch([() => formData.price, () => formData.modal], ([newPrice, newModal]) => {
+    if (isInitializing.value) return
     
-    const dpp = Number(invoiceData.value.dpp)
+    const price = newPrice || 0
     const modal = newModal || 0
     
-    // Calculate Margin: (Modal - DPP) / Modal * 100
-    // If modal is 0, treat as < 10% margin category (2.5% commission)
+    // Calculate Margin: (Price - Modal) / Price * 100
     let margin = 0
-    if (modal > 0 && dpp > 0) {
-        margin = ((modal - dpp) / modal) * 100
+    if (price > 0) {
+        margin = ((price - modal) / price) * 100
     }
+
+    // Calculate Markup
+    formData.markup = price - modal
     
+    // Update margin display with 2 decimal places
+    formData.margin = Number(margin.toFixed(2))
+
     let newPercentage = 0
     if (margin >= 15) {
         newPercentage = 5
@@ -216,33 +271,22 @@ watch(
 )
 
 function resetForm() {
+  isInitializing.value = true
   Object.assign(formData, {
     percentage: 0,
     commission: 0,
     note: '',
-    modal: 0
+    modal: 0,
+    price: 0,
+    margin: 0,
+    markup: 0
+  })
+  nextTick(() => {
+    isInitializing.value = false
   })
 }
 
-const isResell = computed(() => {
-    return String((invoiceData.value as any)?.type || '').toLowerCase().trim().includes('resell')
-})
 
-const isInternal = computed(() => {
-    return String((invoiceData.value as any)?.type || '').toLowerCase().trim().includes('internal')
-})
-
-const percentageOptions = computed(() => {
-  const defaults = [12, 15, 1, 5, 4, 2.5, 0.4]
-
-  if (!invoiceData.value) return defaults
-  const type = String((invoiceData.value as any).type || '').toLowerCase().trim()
-  
-  if (type.includes('resell')) return [5, 4, 2.5, 0.4]
-  if (type.includes('internal')) return [12, 15, 1]
-  
-  return defaults
-})
 
 async function onSubmit(_event: FormSubmitEvent<Schema>) {
   if (!props.ai || !invoiceData.value) return
@@ -250,26 +294,21 @@ async function onSubmit(_event: FormSubmitEvent<Schema>) {
   saving.value = true
   const adjustmentService = new AdjustmentService()
 
-  const oldValue = {
-      salesCommissionPercentage: Number(invoiceData.value.salesCommissionPercentage ?? 0),
-      salesCommission: Number(invoiceData.value.salesCommission ?? 0),
-      modal: Number((invoiceData.value as any).modal ?? 0),
-  }
-
-  const newValue = {
-          salesCommissionPercentage: formData.percentage,
-          salesCommission: formData.commission,
-          modal: formData.modal ?? 0,
-  }
-  
-  const action = 'update'
-
   await adjustmentService.createAdjustment({
       ai: props.ai,
-      oldValue: oldValue as any,
-      newValue: newValue,
-      note: formData.note,
-      action: action
+      percentage: formData.percentage ?? 0,
+      commission: formData.commission ?? 0,
+      modal: formData.modal ?? 0,
+      price: formData.price ?? 0,
+      margin: formData.margin ?? 0,
+      markup: formData.markup ?? 0,
+      note: formData.note
+  })
+
+  toast.add({
+      description: 'Adjustment request submitted. Please ask your manager to approve it.',
+      color: 'success',
+      icon: 'i-lucide-check-circle'
   })
   
   emit('updated')

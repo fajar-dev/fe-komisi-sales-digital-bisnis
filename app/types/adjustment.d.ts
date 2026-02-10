@@ -15,12 +15,13 @@ export interface AdjustmentData {
     ai: number
     employeeId: string
     approvedId: string
-    oldValue: JSON
-    newValue: JSON
-    note:string
-    createdAt: string
-    updatedAt: string
-    action: 'insert' | 'update' | 'delete'
+    modal: string
+    price: string
+    margin: string
+    markup: string
+    commission_percentage: string
+    commission: string
+    note: string
     status: 'pending' | 'approved' | 'decline'
     requestName: string
     requestPhotoProfile: string
@@ -35,8 +36,11 @@ export interface AdjustmentData {
 
 export interface AdjustmentRequestData {
     ai: number
-    oldValue: any
-    newValue: any
-    note:string
-    action: 'insert' | 'update' | 'delete'
+    percentage: number
+    commission: number
+    modal: number
+    price: number
+    margin: number
+    markup: number
+    note: string
 }

@@ -220,17 +220,25 @@ const columns: TableColumn<InvoiceImplementatorData>[] = [
         header: 'Service',
         cell: ({ row }) => {
         return h('div', { class: 'flex flex-col' }, [
-            h('span', { class: 'text-sm text-highlighted' }, row.original.serviceId + ' - ' + row.original.customerServiceId),
-            h('span', { class: 'text-sm' }, row.original.serviceName)
+            h('a', { 
+                href: `https://isx.nusa.net.id/v2/customer/service/${row.original.customerServiceId}/detail`,
+                target: '_blank',
+                class: ['text-blue-500 hover:underline font-semibold']
+            }, row.original.customerServiceId),
+            h('span', { class: 'text-sm whitespace-normal break-words' }, row.original.serviceName)
         ])
         }
     },
     {
-        header: 'Company',
+        header: 'Customer',
         cell: ({ row }) => {
         return h('div', { class: 'flex flex-col' }, [
-            h('span', { class: 'text-sm text-highlighted' }, row.original.customerId),
-            h('span', { class: 'text-sm' }, row.original.customerCompany)
+            h('a', { 
+                href: `https://isx.nusa.net.id/customer.php?custId=${row.original.customerId}&pid=profile`,
+                target: '_blank',
+                class: ['text-blue-500 hover:underline font-semibold']
+            }, row.original.customerId),
+            h('span', { class: 'text-sm whitespace-normal break-words' }, row.original.customerCompany)
         ])
         }
     },
@@ -325,7 +333,7 @@ const commissionChart: Record<string, BulletLegendItemInterface> = {
 }
 
 const xFormatterCommission = (tick: number, _i?: number, _ticks?: number[]): string => {
-  return String(commissionData.value[tick]?.date ?? '')
+  return commissionData.value[tick]?.date ?? ''
 }
 
 const yFormatterCommission = (value: number): string => {
@@ -344,7 +352,7 @@ const totalCommissionChart: Record<string, BulletLegendItemInterface> = {
 }
 
 const xFormatterTotalCommission = (tick: number, _i?: number, _ticks?: number[]): string => {
-  return String(totalCommissionData.value[tick]?.date ?? '')
+  return totalCommissionData.value[tick]?.date ?? ''
 }
 
 // Customer Chart (Bar Chart)
@@ -362,7 +370,7 @@ const customerChart = {
     recurring: { name: 'Recurring', color: '#f97316' },
 }
 
-const xFormatter = (i: number): string => `${customerData.value[i]?.month}`
+const xFormatter = (i: number): string => customerData.value[i]?.month ?? ''
 const yFormatter = (tick: number) => tick.toString()
 
 // Month Card
@@ -403,11 +411,11 @@ const fetchData = async () => {
             booster: booster?.total ?? 0,
             recurring: recurring?.total ?? 0,
         }
-    })
+    }).filter(item => (item.solo + item.booster + item.recurring) > 0)
     totalCommissionData.value = data.data.data.map((item) => ({
         date: item.month,
         total: item.total
-    }))
+    })).filter(item => item.total > 0)
     customerData.value = data.data.data.map((item) => {
         const solo = item.detail.find(d => d.name === 'Base Commission')
         const booster = item.detail.find(d => d.name === 'Retention Booster')
@@ -418,7 +426,8 @@ const fetchData = async () => {
             booster: booster?.count ?? 0,
             recurring: recurring?.count ?? 0,
         }
-    })
+    }).filter(item => (item.solo + item.booster + item.recurring) > 0)
+
 
 }
 

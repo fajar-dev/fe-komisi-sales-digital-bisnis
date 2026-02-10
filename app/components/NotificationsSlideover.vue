@@ -44,7 +44,6 @@
                                         icon: 'i-lucide-user'
                                     }"
                                 />
-                                <UBadge :label="item.action" variant="subtle" :color="item.action === 'delete' ? 'error' : 'primary'" />
                             </div>
                             <UIcon 
                                 name="i-lucide-chevron-down" 
@@ -75,39 +74,31 @@
                             :description="item.note || 'No description'"
                         />
 
-                        <div v-if="expandedIndex === idx" class="overflow-hidden rounded border border-gray-200 dark:border-gray-800">
-                            <table class="w-full text-[10px] border-collapse">
-                                <thead>
-                                    <tr class="bg-gray-50 dark:bg-gray-900">
-                                        <th class="px-2 py-1 text-left font-medium text-gray-500 dark:text-gray-400">
-                                            Field
-                                        </th>
-                                        <th class="px-2 py-1 text-left font-medium text-red-600 dark:text-red-400">
-                                            Old Value
-                                        </th>
-                                        <th class="px-2 py-1 text-left font-medium text-green-600 dark:text-green-400">
-                                            New Value
-                                        </th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr 
-                                        v-for="(value, key) in (item.newValue || item.oldValue || {})" 
-                                        :key="key"
-                                        class="border-t border-gray-200 dark:border-gray-800"
-                                    >
-                                        <td class="px-2 py-1 text-gray-500 dark:text-gray-400">
-                                            {{ formatKey(String(key)) }}
-                                        </td>
-                                        <td class="px-2 py-1 font-medium text-gray-900 dark:text-white">
-                                            {{ item.oldValue?.[key] ?? '-' }}
-                                        </td>
-                                        <td class="px-2 py-1 font-medium text-gray-900 dark:text-white">
-                                            {{ item.newValue?.[key] ?? '-' }}
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                        <div v-if="expandedIndex === idx" class="grid grid-cols-2 gap-2 text-xs p-2 bg-gray-50 dark:bg-gray-800/50 rounded-md border border-gray-100 dark:border-gray-800">
+                             <div>
+                                <span class="text-gray-500">Price</span>
+                                <p class="font-medium">{{ formatCurrency(item.price) }}</p>
+                             </div>
+                             <div>
+                                <span class="text-gray-500">Modal</span>
+                                <p class="font-medium">{{ formatCurrency(item.modal) }}</p>
+                             </div>
+                             <div>
+                                <span class="text-gray-500">Margin</span>
+                                <p class="font-medium">{{ item.margin }}%</p>
+                             </div>
+                             <div>
+                                <span class="text-gray-500">Markup</span>
+                                <p class="font-medium">{{ formatCurrency(item.markup) }}</p>
+                             </div>
+                             <div>
+                                <span class="text-gray-500">Comm. %</span>
+                                <p class="font-medium">{{ item.commission_percentage }}%</p>
+                             </div>
+                             <div>
+                                <span class="text-gray-500">Commission</span>
+                                <p class="font-medium text-green-600 dark:text-green-400">{{ formatCurrency(item.commission) }}</p>
+                             </div>
                         </div>
                     </div>
 
@@ -149,6 +140,8 @@
 <script setup lang="ts">
 import { AdjustmentService } from '~/services/adjustment-service'
 import type { AdjustmentData } from '~/types/adjustment'
+
+const toast = useToast()
 
 const adjustmentService = new AdjustmentService()
 const approvalItems = ref<AdjustmentData[]>([])
@@ -199,15 +192,20 @@ const handleConfirm = async () => {
         await adjustmentService.adjustmentDecline(pendingActionId.value)
     }
     await fetchAdjustments()
+
+    toast.add({
+        description: 'Adjustment request has been processed',
+        color: 'success',
+        icon: 'i-lucide-check-circle'
+    })
     
     isConfirmModalOpen.value = false
     pendingActionId.value = null
     pendingActionType.value = null
 }
 
-function formatKey(key: string) {
-    const result = key.replace(/([A-Z])/g, " $1");
-    return result.charAt(0).toUpperCase() + result.slice(1).toLowerCase();
+const formatCurrency = (val: string | number) => {
+    return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(Number(val))
 }
 
 onMounted(() => {
