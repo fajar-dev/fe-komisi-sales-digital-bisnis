@@ -234,12 +234,15 @@
                 </template>
                     <div class="px-4 pb-4">
                         <h3 class="font-semibold text-lg mb-2">New Resell</h3>
-                        <UTable sticky :data="responseData.newResellData" :columns="newResellColumns" class="flex-1 max-h-[600px] mb-8 [&_tr:has(.row-deleted)]:bg-red-50 dark:[&_tr:has(.row-deleted)]:bg-red-950/20" />
+                        <UTable sticky :data="responseData.newResellData" :columns="newResellColumns" class="flex-1 max-h-[800px] mb-2 [&_tr:has(.row-deleted)]:bg-red-50 dark:[&_tr:has(.row-deleted)]:bg-red-950/20 [&_tr:has(.row-no-margin)]:bg-yellow-50 dark:[&_tr:has(.row-no-margin)]:bg-yellow-900/20" />
+                        <div v-if="noMarginCount > 0" class="alert alert-warning text-yellow-600 dark:text-yellow-500 text-sm mb-6">
+                            {{ noMarginCount }} row(s) don't have a margin.
+                        </div>
                         
                         <UDivider class="my-6" />
 
                         <h3 class="font-semibold text-lg mb-2">Other Invoices</h3>
-                        <UTable sticky :data="responseData.otherData" :columns="otherColumns" class="flex-1 max-h-[600px] [&_tr:has(.row-deleted)]:bg-red-50 dark:[&_tr:has(.row-deleted)]:bg-red-950/20" />
+                        <UTable sticky :data="responseData.otherData" :columns="otherColumns" class="flex-1 max-h-[800px] [&_tr:has(.row-deleted)]:bg-red-50 dark:[&_tr:has(.row-deleted)]:bg-red-950/20" />
                     </div>
 
                 </UCard>
@@ -293,6 +296,10 @@ const UDropdownMenu = resolveComponent('UDropdownMenu')
         totalDpp: 0 
     })
 
+    const noMarginCount = computed(() => {
+        return responseData.value.newResellData.filter(item => !item.margin || Number(item.margin) === 0).length
+    })
+
     const createColumns = (isNewResell: boolean) => {
         const cols: TableColumn<InvoiceSalesData>[] = [
     {
@@ -305,10 +312,14 @@ const UDropdownMenu = resolveComponent('UDropdownMenu')
         },
         cell: ({ row }) => {
             const invoiceNum = row.original.invoiceNumber
+            const hasNoMargin = isNewResell && (!row.original.margin || Number(row.original.margin) === 0)
             return h('a', { 
                 href: `https://isx.nusa.net.id/customer.php?module=customer&pid=printNewCustomerInvoice&invoiceNum=${invoiceNum}&urut=${row.original.position}&new=1&proforma=0&signature=0`,
                 target: '_blank',
-                class: ['text-blue-500 hover:underline', row.original.isDeleted ? 'row-deleted' : '']
+                class: [
+                    'text-blue-500 hover:underline', 
+                    hasNoMargin ? 'row-no-margin' : ''
+                ]
             }, `#${invoiceNum}`)
         }
     },
@@ -355,10 +366,6 @@ const UDropdownMenu = resolveComponent('UDropdownMenu')
                 badges.push({ label: 'Adjustment', color: 'warning', variant: 'solid' })
             }
 
-            if(row.original.isDeleted) {
-                badges.push({ label: 'Deleted', color: 'error', variant: 'solid' })
-            }
-
             return h('div', { class: 'flex gap-1 flex-wrap' }, badges.map(badge => 
                 h(UBadge, { color: badge.color, variant: badge.variant, size: 'md' }, () => badge.label)
             ))
@@ -371,7 +378,7 @@ const UDropdownMenu = resolveComponent('UDropdownMenu')
             h('a', { 
                 href: `https://isx.nusa.net.id/v2/customer/service/${row.original.customerServiceId}/detail`,
                 target: '_blank',
-                class: ['text-blue-500 hover:underline font-semibold', row.original.isDeleted ? 'row-deleted' : '']
+                class: ['text-blue-500 hover:underline font-semibold']
             }, row.original.customerServiceId),
             h('span', { class: 'text-sm whitespace-normal break-words' }, row.original.serviceName)
         ])
@@ -384,7 +391,7 @@ const UDropdownMenu = resolveComponent('UDropdownMenu')
             h('a', { 
                 href: `https://isx.nusa.net.id/customer.php?custId=${row.original.customerId}&pid=profile`,
                 target: '_blank',
-                class: ['text-blue-500 hover:underline font-semibold', row.original.isDeleted ? 'row-deleted' : '']
+                class: ['text-blue-500 hover:underline font-semibold']
             }, row.original.customerId),
             h('span', { class: 'text-sm whitespace-normal break-words' }, row.original.customerCompany)
         ])
