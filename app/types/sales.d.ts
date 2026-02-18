@@ -68,6 +68,7 @@ export interface InvoiceSalesData {
     position: number;
     invoiceDate: string;
     dpp: number;
+    implementator: implementator;
     newSub:number
     paidDate: string;
     monthPeriod: number;
@@ -88,7 +89,16 @@ export interface InvoiceSalesData {
     isAdjustment: boolean;
     type:string
     salesCommissionPercentage: number;
+    modal: string | null;
+    price: string | null;
     margin: string | null;
     markup: string | null;
 }
+
+export interface implementator {
+    name: string;
+    id: string;
+    photo: string;
+}
+
 

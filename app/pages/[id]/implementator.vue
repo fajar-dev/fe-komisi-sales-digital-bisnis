@@ -168,6 +168,7 @@ import type { TableColumn } from '@nuxt/ui'
 import type { InvoiceImplementatorData } from '~/types/implementator'
 
 const UBadge = resolveComponent('UBadge')
+const UAvatar = resolveComponent('UAvatar')
 
 const invoiceData = ref<InvoiceImplementatorData[]>([])
 
@@ -239,6 +240,24 @@ const columns: TableColumn<InvoiceImplementatorData>[] = [
                 class: ['text-blue-500 hover:underline font-semibold']
             }, row.original.customerId),
             h('span', { class: 'text-sm whitespace-normal break-words' }, row.original.customerCompany)
+        ])
+        }
+    },
+    {
+        header: 'Sales',
+        cell: ({ row }) => {
+        if (!row.original.sales.id) {
+            return '-'
+        }
+        return h('div', { class: 'flex items-center gap-3' }, [
+            h(UAvatar, {
+            src: row.original.sales.photo,
+            size: 'lg'
+            }),
+            h('div', undefined, [
+            h('p', { class: 'font-medium text-highlighted' }, row.original.sales.name),
+            h('p', { class: '' }, row.original.sales.id)
+            ])
         ])
         }
     },

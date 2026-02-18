@@ -258,7 +258,6 @@ import { InvoiceService } from '~/services/invoice-service'
 import type { Employee } from '~/types/employee'
 
 import { CalendarDate, DateFormatter, getLocalTimeZone } from '@internationalized/date'
-import { type Row } from '@tanstack/table-core'
 
 const df = new DateFormatter('en-US', {
   dateStyle: 'medium'
@@ -279,6 +278,7 @@ import type { InvoiceSalesData, InvoiceSalesResponseData } from '~/types/sales'
 
 const UBadge = resolveComponent('UBadge')
 const UButton = resolveComponent('UButton')
+const UAvatar = resolveComponent('UAvatar')
 const UDropdownMenu = resolveComponent('UDropdownMenu')
 
 
@@ -398,6 +398,92 @@ const UDropdownMenu = resolveComponent('UDropdownMenu')
         }
     },
     {
+        header: 'Implementator',
+        cell: ({ row }) => {
+        if (!row.original.implementator.id) {
+            return '-'
+        }
+        return h('div', { class: 'flex items-center gap-3' }, [
+            h(UAvatar, {
+            src: row.original.implementator.photo,
+            size: 'lg'
+            }),
+            h('div', undefined, [
+            h('p', { class: 'font-medium text-highlighted' }, row.original.implementator.name),
+            h('p', { class: '' }, row.original.implementator.id)
+            ])
+        ])
+        }
+    }
+]
+
+    if (isNewResell) {
+        cols.push(
+            {
+                accessorKey: 'modal',
+                header: 'Modal (1 License)',
+                cell: ({ row }) => {
+                const amount = Number.parseFloat(row.getValue('modal')) || 0
+                return new Intl.NumberFormat('id-ID', {
+                    style: 'currency',
+                    currency: 'IDR'
+                }).format(amount)
+                },
+                footer: () => {
+                     const amount = isNewResell 
+                        ? responseData.value.newResellData.reduce((sum, item) => sum + (Number(item.modal) || 0), 0)
+                        : 0.00
+        
+                    return h('div', { class: 'text-right font-bold' }, new Intl.NumberFormat('id-ID', {
+                        style: 'currency',
+                        currency: 'IDR'
+                    }).format(amount ?? 0))
+                }
+            },
+            {
+                accessorKey: 'price',
+                header: 'Resell Price (1 License)',
+                cell: ({ row }) => {
+                const amount = Number.parseFloat(row.getValue('price')) || 0
+                return new Intl.NumberFormat('id-ID', {
+                    style: 'currency',
+                    currency: 'IDR'
+                }).format(amount)
+                },
+                footer: () => {
+                     const amount = isNewResell 
+                        ? responseData.value.newResellData.reduce((sum, item) => sum + (Number(item.price) || 0), 0)
+                        : 0.00
+        
+                    return h('div', { class: 'text-right font-bold' }, new Intl.NumberFormat('id-ID', {
+                        style: 'currency',
+                        currency: 'IDR'
+                    }).format(amount ?? 0))
+                }
+            },
+            {
+                header: 'Margin',
+                meta: {
+                class: {
+                    th: 'text-right',
+                    td: 'text-right font-medium'
+                }
+                },
+                cell: ({ row }) => {
+                return h('div', { class: 'flex flex-col' }, [
+                    h('span', { class: 'text-sm text-highlighted' }, Intl.NumberFormat('id-ID', { style: 'decimal' }).format(responseData.value.newResellData.reduce((sum, item) => sum + (Number(item.margin) || 0), 0)) + '%'),
+                    h('span', { class: 'text-sm' }, new Intl.NumberFormat('id-ID', {
+                        style: 'currency',
+                        currency: 'IDR'
+                    }).format(responseData.value.newResellData.reduce((sum, item) => sum + (Number(item.markup) || 0), 0)))
+                ])
+                }
+            }
+        )
+    }
+
+    cols.push(
+    {
         accessorKey: 'dpp',
         header: 'DPP',
         meta: {
@@ -425,23 +511,23 @@ const UDropdownMenu = resolveComponent('UDropdownMenu')
         }
     },
     {
-        header: 'Month',
+        header: 'Period (Month)',
         meta: {
             class: {
-                th: 'text-right',
-                td: 'text-right font-medium'
+                th: 'text-center',
+                td: 'text-center font-medium'
             }
         },
         cell: ({ row }) => {
-        return row.original.monthPeriod
+        return row.original.monthPeriod 
         }
     },
     {
         header: 'Invoice Number',
         meta: {
             class: {
-                th: 'text-right',
-                td: 'text-right font-medium'
+                th: 'text-center',
+                td: 'text-center font-medium'
             }
         },
         cell: ({ row }) => {
@@ -476,7 +562,7 @@ const UDropdownMenu = resolveComponent('UDropdownMenu')
             }).format(amount ?? 0))
         }
     }
-]
+    )
 
     if (isNewResell && authService.user.value?.employee_id === route.params.id) {
         cols.push({

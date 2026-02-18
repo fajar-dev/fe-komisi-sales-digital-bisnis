@@ -45,6 +45,7 @@ export interface InvoiceImplementatorData {
     paidDate: string;
     monthPeriod: number;
     dpp: number;
+    sales: sales;
     customerServiceId: number;
     customerId: string;
     customerCompany: string;
@@ -61,4 +62,10 @@ export interface InvoiceImplementatorData {
     isAdjustment: boolean;
     implementatorCommission: number;
     implementatorCommissionPercentage: number;
+}
+
+export interface sales {
+    name: string;
+    id: string;
+    photo: string;
 }
