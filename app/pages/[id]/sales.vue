@@ -471,11 +471,11 @@ const UDropdownMenu = resolveComponent('UDropdownMenu')
                 },
                 cell: ({ row }) => {
                 return h('div', { class: 'flex flex-col' }, [
-                    h('span', { class: 'text-sm text-highlighted' }, Intl.NumberFormat('id-ID', { style: 'decimal' }).format(responseData.value.newResellData.reduce((sum, item) => sum + (Number(item.margin) || 0), 0)) + '%'),
+                    h('span', { class: 'text-sm text-highlighted' }, Intl.NumberFormat('id-ID', { style: 'decimal' }).format(Number(row.original.margin) || 0) + '%'),
                     h('span', { class: 'text-sm' }, new Intl.NumberFormat('id-ID', {
                         style: 'currency',
                         currency: 'IDR'
-                    }).format(responseData.value.newResellData.reduce((sum, item) => sum + (Number(item.markup) || 0), 0)))
+                    }).format(Number(row.original.markup) || 0))
                 ])
                 }
             }
