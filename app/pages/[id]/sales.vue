@@ -18,9 +18,19 @@
                 <UPageCard
                     v-for="card in monthcard"
                     :key="card.mounth"
-                    :title="String(card.total)"
+                    :title="card.total"
                     :description="card.mounth"
                 >
+                    <div class="mt-2 space-y-1">
+                        <div class="flex items-center justify-between text-[10px] leading-none">
+                            <span class="text-gray-500 dark:text-gray-400 uppercase font-semibold">MRC</span>
+                            <span class="font-bold text-highlighted text-blue-500 dark:text-blue-400">{{ card.mrc }}</span>
+                        </div>
+                        <div class="flex items-center justify-between text-[10px] leading-none">
+                            <span class="text-gray-500 dark:text-gray-400 uppercase font-semibold">Sub</span>
+                            <span class="font-bold text-highlighted text-green-500 dark:text-green-400">{{ card.subscription }}</span>
+                        </div>
+                    </div>
                 </UPageCard>
             </div>
         </div>
@@ -133,7 +143,7 @@
                     :data="customerInternalData"
                     :height="300"
                     :categories="customerInternalChart"
-                    :y-axis="['solo', 'booster', 'recurring']"
+                    :y-axis="['solo', 'booster', 'prorate', 'recurring']"
                     :group-padding="0"
                     :bar-padding="0.2"
                     :x-num-ticks="6"
@@ -429,15 +439,13 @@ const UDropdownMenu = resolveComponent('UDropdownMenu')
                     currency: 'IDR'
                 }).format(amount)
                 },
-                footer: () => {
-                     const amount = isNewResell 
-                        ? responseData.value.newResellData.reduce((sum, item) => sum + (Number(item.modal) || 0), 0)
-                        : 0.00
+                footer: ({ table }) => {
+                    const amount = table.getFilteredRowModel().rows.reduce((sum, row) => sum + (Number(row.original.modal) || 0), 0)
         
                     return h('div', { class: 'text-right font-bold' }, new Intl.NumberFormat('id-ID', {
                         style: 'currency',
                         currency: 'IDR'
-                    }).format(amount ?? 0))
+                    }).format(amount))
                 }
             },
             {
@@ -450,15 +458,13 @@ const UDropdownMenu = resolveComponent('UDropdownMenu')
                     currency: 'IDR'
                 }).format(amount)
                 },
-                footer: () => {
-                     const amount = isNewResell 
-                        ? responseData.value.newResellData.reduce((sum, item) => sum + (Number(item.price) || 0), 0)
-                        : 0.00
+                footer: ({ table }) => {
+                    const amount = table.getFilteredRowModel().rows.reduce((sum, row) => sum + (Number(row.original.price) || 0), 0)
         
                     return h('div', { class: 'text-right font-bold' }, new Intl.NumberFormat('id-ID', {
                         style: 'currency',
                         currency: 'IDR'
-                    }).format(amount ?? 0))
+                    }).format(amount))
                 }
             },
             {
@@ -499,15 +505,38 @@ const UDropdownMenu = resolveComponent('UDropdownMenu')
             currency: 'IDR'
         }).format(amount)
         },
-        footer: () => {
-             const amount = isNewResell 
-                ? responseData.value.newResellTotalDpp 
-                : responseData.value.otherTotalDpp
+        footer: ({ table }) => {
+            const amount = table.getFilteredRowModel().rows.reduce((sum, row) => sum + (Number(row.original.dpp) || 0), 0)
 
             return h('div', { class: 'text-right font-bold' }, new Intl.NumberFormat('id-ID', {
                 style: 'currency',
                 currency: 'IDR'
-            }).format(amount ?? 0))
+            }).format(amount))
+        }
+    },
+    {
+        accessorKey: 'mrc',
+        header: 'MRC',
+        meta: {
+        class: {
+            th: 'text-right',
+            td: 'text-right font-medium'
+        }
+        },
+        cell: ({ row }) => {
+        const amount = Number.parseFloat(row.getValue('mrc'))
+        return new Intl.NumberFormat('id-ID', {
+            style: 'currency',
+            currency: 'IDR'
+        }).format(amount)
+        },
+        footer: ({ table }) => {
+            const amount = table.getFilteredRowModel().rows.reduce((sum, row) => sum + (Number(row.original.mrc) || 0), 0)
+
+            return h('div', { class: 'text-right font-bold' }, new Intl.NumberFormat('id-ID', {
+                style: 'currency',
+                currency: 'IDR'
+            }).format(amount))
         }
     },
     {
@@ -519,7 +548,7 @@ const UDropdownMenu = resolveComponent('UDropdownMenu')
             }
         },
         cell: ({ row }) => {
-        return row.original.monthPeriod 
+            return Number(row.original.monthPeriod)
         }
     },
     {
@@ -551,15 +580,13 @@ const UDropdownMenu = resolveComponent('UDropdownMenu')
             }).format(row.original.salesCommission))
         ])
         },
-        footer: () => {
-            const amount = isNewResell 
-                ? responseData.value.newResellTotalCommission 
-                : responseData.value.otherTotalCommission
+        footer: ({ table }) => {
+            const amount = table.getFilteredRowModel().rows.reduce((sum, row) => sum + (Number(row.original.salesCommission) || 0), 0)
             
             return h('div', { class: 'text-right font-bold' }, new Intl.NumberFormat('id-ID', {
                 style: 'currency',
                 currency: 'IDR'
-            }).format(amount ?? 0))
+            }).format(amount))
         }
     }
     )
@@ -632,12 +659,14 @@ const commissionInternalData = ref<{
     date: string;
     solo: number;
     booster: number;
+    prorate: number;
     recurring: number;
 }[]>([])
 
 const commissionInternalChart: Record<string, BulletLegendItemInterface> = {
     solo: { name: 'Solo', color: '#3b82f6' },
     booster: { name: 'Booster', color: '#22c55e' },
+    prorate: { name: 'Prorate', color: '#eab308' },
     recurring: { name: 'Recurring', color: '#f97316' },
 }
 
@@ -692,12 +721,14 @@ const customerInternalData = ref<{
     month: string;
     solo: number;
     booster: number;
+    prorate: number;
     recurring: number;
 }[]>([])
 
 const customerInternalChart = {
     solo: { name: 'Solo', color: '#3b82f6' },
     booster: { name: 'Booster', color: '#22c55e' },
+    prorate: { name: 'Prorate', color: '#eab308' },
     recurring: { name: 'Recurring', color: '#f97316' },
 }
 
@@ -724,7 +755,7 @@ const xFormatterResell = (i: number): string => customerResellData.value[i]?.mon
 const yFormatter = (tick: number) => tick.toString()
 
 // Month Card
-const monthcard = ref<{ mounth: string; total: string }[]>([])
+const monthcard = ref<{ mounth: string; total: string; mrc: string; subscription: string }[]>([])
 
 const fetchData = async () => {
     const additionalService = new AdditionalService()
@@ -754,24 +785,31 @@ const fetchData = async () => {
     ]
     
     // Month Card
-    monthcard.value = data.data.data.map((item) => ({
-        mounth: item.month,
-        total: new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(item.total),
-    }))
+    monthcard.value = data.data.data.map((item) => {
+        const detail = item.detail?.[0]
+        return {
+            mounth: item.month,
+            total: formatCurrency(item.total),
+            mrc: formatCurrency(detail?.mrc ?? 0),
+            subscription: formatCurrency(detail?.subscription ?? 0),
+        }
+    })
     
     // Commission Data Internal
     commissionInternalData.value = data.data.data.map((item) => {
         const detail = item.detail?.[0]
         const solo = detail?.internal?.find(d => d.name === 'Solo')
         const booster = detail?.internal?.find(d => d.name === 'Booster')
+        const prorate = detail?.internal?.find(d => d.name === 'Prorate')
         const recurring = detail?.internal?.find(d => d.name === 'Recurring')
         return {
             date: item.month,
             solo: solo?.total ?? 0,
             booster: booster?.total ?? 0,
+            prorate: prorate?.total ?? 0,
             recurring: recurring?.total ?? 0,
         }
-    }).filter(item => (item.solo + item.booster + item.recurring) > 0)
+    }).filter(item => (item.solo + item.booster + item.prorate + item.recurring) > 0)
     
     // Commission Data Resell
     commissionResellData.value = data.data.data.map((item) => {
@@ -801,14 +839,16 @@ const fetchData = async () => {
         const detail = item.detail?.[0]
         const solo = detail?.internal?.find(d => d.name === 'Solo')
         const booster = detail?.internal?.find(d => d.name === 'Booster')
+        const prorate = detail?.internal?.find(d => d.name === 'Prorate')
         const recurring = detail?.internal?.find(d => d.name === 'Recurring')
         return {
             month: item.month,
             solo: solo?.count ?? 0,
             booster: booster?.count ?? 0,
+            prorate: prorate?.count ?? 0,
             recurring: recurring?.count ?? 0,
         }
-    }).filter(item => (item.solo + item.booster + item.recurring) > 0)
+    }).filter(item => (item.solo + item.booster + item.prorate + item.recurring) > 0)
     
     // Customer Data Resell
     customerResellData.value = data.data.data.map((item) => {

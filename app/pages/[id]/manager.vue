@@ -55,90 +55,170 @@
         </div>
 
         <div class="py-2">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <UCard>
-            <template #header>
-                <div class="space-y-3">
-                    <div>
-                        <h2>Commission</h2>
-                        <p class="text-sm text-gray-500 dark:text-gray-400">
-                            Sales Commission
-                        </p>
-                    </div>
-                    <!-- Custom Legend -->
-                    <div class="flex flex-wrap gap-x-4 gap-y-2">
-                        <div 
-                            v-for="(item, key) in commissionChart" 
-                            :key="key"
-                            class="flex items-center gap-1.5"
-                        >
-                            <div 
-                                :style="`background-color: ${item.color}`"
-                                class="w-3 h-3 rounded-sm flex-shrink-0"
-                            />
-                            <span class="text-xs text-gray-700 dark:text-gray-300">{{ item.name }}</span>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <UCard>
+                    <template #header>
+                        <div class="space-y-3">
+                            <div>
+                                <h2>MRC</h2>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">
+                                    Monthly Recurring Charge
+                                </p>
+                            </div>
+                            <!-- Custom Legend -->
+                            <div class="flex flex-wrap gap-x-4 gap-y-2">
+                                <div 
+                                    v-for="(item, key) in mrcChart" 
+                                    :key="key"
+                                    class="flex items-center gap-1.5"
+                                >
+                                    <div 
+                                        :style="`background-color: ${item.color}`"
+                                        class="w-3 h-3 rounded-sm flex-shrink-0"
+                                    />
+                                    <span class="text-xs text-gray-700 dark:text-gray-300">{{ item.name }}</span>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                </div>
-            </template>
-                <AreaChart
-                    v-if="Object.keys(commissionChart).length > 0"
-                    :key="colorMode.value"
-                    :data="commissionData"
-                    :height="280"
-                    :categories="commissionChart"
-                    :stacked="true"
-                    :x-formatter="xFormatterCommission"
-                    :y-formatter="yFormatterCommission"
-                    :curve-type="CurveType.MonotoneX"
-                    :hide-legend="true"
-                    :y-grid-line="true"
-                    :x-grid-line="false"
-                />
-            </UCard>
-            
-            <UCard>
-            <template #header>
-                <div class="space-y-3">
-                    <div>
-                        <h2>Customer</h2>
-                        <p class="text-sm text-gray-500 dark:text-gray-400">
-                            Customer Count
-                        </p>
-                    </div>
-                    <!-- Custom Legend -->
-                    <div class="flex flex-wrap gap-x-4 gap-y-2">
-                        <div 
-                            v-for="(item, key) in customerChart" 
-                            :key="key"
-                            class="flex items-center gap-1.5"
-                        >
-                            <div 
-                                :style="`background-color: ${item.color}`"
-                                class="w-3 h-3 rounded-sm flex-shrink-0"
-                            />
-                            <span class="text-xs text-gray-700 dark:text-gray-300">{{ item.name }}</span>
+                    </template>
+                    <LineChart
+                        v-if="mrcData.length > 0"
+                        :data="mrcData"
+                        :height="280"
+                        :categories="mrcChart"
+                        :x-formatter="xFormatterCommission"
+                        :y-formatter="yFormatterCommission"
+                        :curve-type="CurveType.MonotoneX"
+                        :hide-legend="true"
+                        :y-grid-line="true"
+                    />
+                </UCard>
+                
+                <UCard>
+                    <template #header>
+                        <div class="space-y-3">
+                            <div>
+                                <h2>Subscription</h2>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">
+                                    Subscription Total
+                                </p>
+                            </div>
+                            <!-- Custom Legend -->
+                            <div class="flex flex-wrap gap-x-4 gap-y-2">
+                                <div 
+                                    v-for="(item, key) in subscriptionChart" 
+                                    :key="key"
+                                    class="flex items-center gap-1.5"
+                                >
+                                    <div 
+                                        :style="`background-color: ${item.color}`"
+                                        class="w-3 h-3 rounded-sm flex-shrink-0"
+                                    />
+                                    <span class="text-xs text-gray-700 dark:text-gray-300">{{ item.name }}</span>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                </div>
-            </template>
-                <BarChart
-                    v-if="barChartYAxis.length > 0"
-                    :data="customerData"
-                    :height="300"
-                    :categories="customerChart"
-                    :y-axis="barChartYAxis"
-                    :group-padding="0"
-                    :bar-padding="0.2"
-                    :x-num-ticks="6"
-                    :radius="4"
-                    :x-formatter="xFormatter"
-                    :y-formatter="yFormatter"
-                    :hide-legend="true"
-                    :y-grid-line="true"
-                />
-            </UCard>
+                    </template>
+                    <LineChart
+                        v-if="subscriptionData.length > 0"
+                        :data="subscriptionData"
+                        :height="280"
+                        :categories="subscriptionChart"
+                        :x-formatter="xFormatterCommission"
+                        :y-formatter="yFormatterCommission"
+                        :curve-type="CurveType.MonotoneX"
+                        :hide-legend="true"
+                        :y-grid-line="true"
+                    />
+                </UCard>
+            </div>
         </div>
+
+        <div class="py-2">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <UCard>
+                <template #header>
+                    <div class="space-y-3">
+                        <div>
+                            <h2>Commission</h2>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">
+                                Sales Commission
+                            </p>
+                        </div>
+                        <!-- Custom Legend -->
+                        <div class="flex flex-wrap gap-x-4 gap-y-2">
+                            <div 
+                                v-for="(item, key) in commissionChart" 
+                                :key="key"
+                                class="flex items-center gap-1.5"
+                            >
+                                <div 
+                                    :style="`background-color: ${item.color}`"
+                                    class="w-3 h-3 rounded-sm flex-shrink-0"
+                                />
+                                <span class="text-xs text-gray-700 dark:text-gray-300">{{ item.name }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+                    <AreaChart
+                        v-if="Object.keys(commissionChart).length > 0"
+                        :key="colorMode.value"
+                        :data="commissionData"
+                        :height="280"
+                        :categories="commissionChart"
+                        :stacked="true"
+                        :x-formatter="xFormatterCommission"
+                        :y-formatter="yFormatterCommission"
+                        :curve-type="CurveType.MonotoneX"
+                        :hide-legend="true"
+                        :y-grid-line="true"
+                        :x-grid-line="false"
+                    />
+                </UCard>
+                
+                <UCard>
+                <template #header>
+                    <div class="space-y-3">
+                        <div>
+                            <h2>Customer</h2>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">
+                                Customer Count
+                            </p>
+                        </div>
+                        <!-- Custom Legend -->
+                        <div class="flex flex-wrap gap-x-4 gap-y-2">
+                            <div 
+                                v-for="(item, key) in customerChart" 
+                                :key="key"
+                                class="flex items-center gap-1.5"
+                            >
+                                <div 
+                                    :style="`background-color: ${item.color}`"
+                                    class="w-3 h-3 rounded-sm flex-shrink-0"
+                                />
+                                <span class="text-xs text-gray-700 dark:text-gray-300">{{ item.name }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+                    <BarChart
+                        v-if="barChartYAxis.length > 0"
+                        :data="customerData"
+                        :height="300"
+                        :categories="customerChart"
+                        :y-axis="barChartYAxis"
+                        :group-padding="0"
+                        :bar-padding="0.2"
+                        :x-num-ticks="6"
+                        :radius="4"
+                        :x-formatter="xFormatter"
+                        :y-formatter="yFormatter"
+                        :hide-legend="true"
+                        :y-grid-line="true"
+                    />
+                </UCard>
+            </div>
         </div>
 
         <div class="py-2">
@@ -218,6 +298,14 @@ const barChartYAxis = ref<string[]>([])
 
 const xFormatter = (i: number): string => customerData.value[i]?.month ?? ''
 const yFormatter = (tick: number) => tick.toString()
+
+// MRC Chart
+const mrcData = ref<any[]>([])
+const mrcChart = ref<Record<string, BulletLegendItemInterface>>({})
+
+// Subscription Chart
+const subscriptionData = ref<any[]>([])
+const subscriptionChart = ref<Record<string, BulletLegendItemInterface>>({})
 
 // Month Card
 
@@ -315,6 +403,8 @@ const fetchData = async () => {
 
     commissionChart.value = newChartConfig
     customerChart.value = newChartConfig
+    mrcChart.value = newChartConfig
+    subscriptionChart.value = newChartConfig
     barChartYAxis.value = yAxisKeys
 
     // Generate Commission Data
@@ -358,6 +448,38 @@ const fetchData = async () => {
     
     // Filter out rows with 0 total count
     customerData.value = rawCustomerData.filter((row: any) => row.total > 0)
+
+    // Generate MRC Data
+    const rawMrcData = data.data.data.map(item => {
+        const row: any = { date: item.month, total: 0 }
+        yAxisKeys.forEach(key => row[key] = 0)
+        
+        item.detail.forEach(d => {
+            const key = d.name.toLowerCase().replace(/[^a-z0-9]/g, '_')
+            if (newChartConfig[key]) {
+                row[key] = d.mrc || 0
+                row.total += (d.mrc || 0)
+            }
+        })
+        return row
+    })
+    mrcData.value = rawMrcData.filter((row: any) => row.total > 0)
+
+    // Generate Subscription Data
+    const rawSubscriptionData = data.data.data.map(item => {
+        const row: any = { date: item.month, total: 0 }
+        yAxisKeys.forEach(key => row[key] = 0)
+        
+        item.detail.forEach(d => {
+            const key = d.name.toLowerCase().replace(/[^a-z0-9]/g, '_')
+            if (newChartConfig[key]) {
+                row[key] = d.subscription || 0
+                row.total += (d.subscription || 0)
+            }
+        })
+        return row
+    })
+    subscriptionData.value = rawSubscriptionData.filter((row: any) => row.total > 0)
 
     const teamService = new TeamService()
     const teamResponse = await teamService.getTeamCommission(route.params.id as string, { year: year.value })

@@ -6,6 +6,8 @@ export interface ManagerMonthlyDetail {
     name: string;
     count: number;
     total: number;
+    mrc: number;
+    subscription: number;
 }
 
 export interface ManagerMonthlyData {

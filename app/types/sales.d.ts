@@ -14,6 +14,8 @@ export interface MonthlyDetailBreakdown {
     total: number;
     totalInternal: number;
     totalResell: number;
+    mrc: number;
+    subscription: number;
     internal: MonthlyBucketDetailItem[];
     resell: MonthlyBucketDetailItem[];
 }
@@ -93,6 +95,7 @@ export interface InvoiceSalesData {
     price: string | null;
     margin: string | null;
     markup: string | null;
+    mrc: number | string | null;
 }
 
 export interface implementator {
