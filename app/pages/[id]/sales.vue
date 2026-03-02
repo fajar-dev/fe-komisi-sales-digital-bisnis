@@ -357,7 +357,7 @@ const UDropdownMenu = resolveComponent('UDropdownMenu')
                 badges.push({ label: 'Prorata', color: 'warning', variant: 'subtle' })
             }
             if (row.original.isTermin) {
-                badges.push({ label: 'Termin', color: 'warning', variant: 'subtle' })
+                badges.push({ label: 'Termin', color: 'success', variant: 'subtle' })
             }
 
             if(!row.original.isNew && !row.original.isUpgrade && !row.original.isTermin) {
