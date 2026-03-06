@@ -10,7 +10,7 @@
         </div>
 
         <div class="py-2">
-        <div class="flex items-end justify-between">
+        <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
             <div class="space-y-1">
                 <h2 class="text-2xl font-semibold text-gray-900 dark:text-white">
                     My Team
@@ -19,13 +19,16 @@
                     Team member list
                 </p>
             </div>
+            <div class="w-full lg:w-auto">
+                <UInput v-model="searchQuery" icon="i-lucide-search" size="md" variant="outline" class="w-full" placeholder="Search..." />
+            </div>
         </div>
         </div>
 
         <div class="py-2">
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             <UPageCard
-                v-for="card in employeeCard"
+                v-for="card in filteredEmployeeCards"
                 :key="card.employeeId"
                 :to="card.to"
             >
@@ -63,7 +66,7 @@ import { EmployeeService } from '~/services/employee-service';
 
 const { state: authState } = useAuth()
 const employeeCard = ref<{ employeeId: string; name: string; photoProfile: string; position: string; organizationName: string; jobLevel: string; to: string }[]>([])
-
+const searchQuery = ref('')
 const { getRoute } = useDashboardRoute()
 
 const greeting = computed(() => {
@@ -71,6 +74,19 @@ const greeting = computed(() => {
     if (hour < 12) return 'Good Morning'
     if (hour < 18) return 'Good Afternoon'
     return 'Good Evening'
+})
+
+const filteredEmployeeCards = computed(() => {
+    if (!searchQuery.value) {
+        return employeeCard.value
+    }
+    const query = searchQuery.value.toLowerCase()
+    return employeeCard.value.filter(card => {
+        return card.name.toLowerCase().includes(query) ||
+               card.employeeId.toLowerCase().includes(query) ||
+               card.position.toLowerCase().includes(query) ||
+               card.organizationName.toLowerCase().includes(query)
+    })
 })
 
 const fetchEmployeeCard = async () => {

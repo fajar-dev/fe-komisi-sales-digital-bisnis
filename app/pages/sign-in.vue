@@ -9,11 +9,11 @@
             >
                 <UCard>
                   <div class="space-y-4">
-                    <div class="flex justify-center mb-5">
+                    <div class="flex justify-center mb-3">
                         <img
-                            src="/logo.png"
+                            src="/logo.webp"
                             alt="Sele-Sele Logo"
-                            class="h-10 w-auto object-contain transition-transform hover:scale-110 duration-300"
+                            class="h-12 w-auto object-contain transition-transform hover:scale-110 duration-300"
                         />
                     </div>
                     

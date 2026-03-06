@@ -8,7 +8,7 @@
     >
         <template #left>
         <NuxtLink to="/">
-            <img class="h-10" src="/logo.png" alt="Logo" />
+            <img class="h-10" src="/logo.webp" alt="Logo" />
         </NuxtLink>
         </template>
 
