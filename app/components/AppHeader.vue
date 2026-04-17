@@ -18,8 +18,6 @@
             class="flex items-center gap-1"
         >
         
-            <NotificationsSlideover />
-
             <UColorModeButton size="sm" />
             <ClientOnly>
                 <UDropdownMenu

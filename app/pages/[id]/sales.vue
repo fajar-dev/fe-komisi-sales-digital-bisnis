@@ -1,10 +1,5 @@
 <template>
     <UContainer>
-        <AdjustmentModal
-          :ai="invoiceAi"
-          v-model:open="isAdjustmentModalOpen"
-          @updated="fetchInvoiceData()"
-        />
         <HeroBackground />
         <CommissionHeader
             :employee="employee"
@@ -278,9 +273,6 @@ const modelValue = shallowRef({
     end: new CalendarDate(2026, 1, 31)
 })
 
-const isAdjustmentModalOpen = ref(false)
-const invoiceAi = ref<number>(0)
-
 import { h, resolveComponent } from 'vue'
 import type { DropdownMenuItem, TableColumn } from '@nuxt/ui'
 import { AdditionalService } from '~/services/additional-service'
@@ -289,10 +281,6 @@ import type { InvoiceSalesData, InvoiceSalesResponseData } from '~/types/sales'
 const UBadge = resolveComponent('UBadge')
 const UButton = resolveComponent('UButton')
 const UAvatar = resolveComponent('UAvatar')
-const UDropdownMenu = resolveComponent('UDropdownMenu')
-
-
-    import { authService } from '~/services/auth-service'
 
     const route = useRoute()
     const responseData = ref<InvoiceSalesResponseData['data']>({ 
@@ -370,10 +358,6 @@ const UDropdownMenu = resolveComponent('UDropdownMenu')
 
             if(row.original.type === 'resell') {
                 badges.push({ label: 'Resell', color: 'info', variant: 'outline' })
-            }
-
-            if(row.original.isAdjustment) {
-                badges.push({ label: 'Adjustment', color: 'warning', variant: 'solid' })
             }
 
             return h('div', { class: 'flex gap-1 flex-wrap' }, badges.map(badge => 
@@ -552,18 +536,6 @@ const UDropdownMenu = resolveComponent('UDropdownMenu')
         }
     },
     {
-        header: 'Invoice Number',
-        meta: {
-            class: {
-                th: 'text-center',
-                td: 'text-center font-medium'
-            }
-        },
-        cell: ({ row }) => {
-        return row.original.counter
-        }
-    },
-    {
         header: 'Commission',
         meta: {
         class: {
@@ -590,28 +562,6 @@ const UDropdownMenu = resolveComponent('UDropdownMenu')
         }
     }
     )
-
-    if (isNewResell && authService.user.value?.employee_id === route.params.id) {
-        cols.push({
-            id: 'actions',
-            cell: ({ row }) => {
-                return h(
-                    'div',
-                    { class: 'text-right' },
-                    h(UButton, {
-                        icon: 'i-lucide-edit',
-                        color: 'neutral',
-                        variant: 'ghost',
-                        class: 'ml-auto',
-                        onClick: () => {
-                            invoiceAi.value = row.original.ai
-                            isAdjustmentModalOpen.value = true
-                        }
-                    })
-                )
-            }
-        })
-    }
 
     return cols
 }

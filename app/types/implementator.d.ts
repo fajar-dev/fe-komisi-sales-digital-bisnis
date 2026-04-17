@@ -59,7 +59,6 @@ export interface InvoiceImplementatorData {
     isNew: boolean;
     isUpgrade: boolean;
     isTermin: boolean;
-    isAdjustment: boolean;
     implementatorCommission: number;
     implementatorCommissionPercentage: number;
 }

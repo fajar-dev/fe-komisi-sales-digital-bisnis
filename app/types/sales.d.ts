@@ -88,7 +88,6 @@ export interface InvoiceSalesData {
     isUpgrade: boolean;
     isTermin: boolean;
     salesCommission: number;
-    isAdjustment: boolean;
     type:string
     salesCommissionPercentage: number;
     modal: string | null;
