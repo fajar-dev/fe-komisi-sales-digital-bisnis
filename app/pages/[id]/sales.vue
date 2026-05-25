@@ -11,15 +11,10 @@
                 <UCard>
                 <template #header>
                     <div class="flex items-center justify-between">
-                        <div>
-                            <h2>Invoice</h2>
-                            <p class="text-sm text-gray-500 dark:text-gray-400">
-                            Customer Invoice
-                            </p>
-                        </div>
+
                     </div>
                 </template>
-                    <div class="px-4 pb-4">
+                    <div>
                         <UTable sticky :data="responseData.data" :columns="columns" class="flex-1 max-h-[800px] mb-2 [&_tr:has(.row-deleted)]:bg-red-50 dark:[&_tr:has(.row-deleted)]:bg-red-950/20 [&_tr:has(.row-no-margin)]:bg-yellow-50 dark:[&_tr:has(.row-no-margin)]:bg-yellow-900/20" />
                         <div v-if="noMarginCount > 0" class="alert alert-warning text-yellow-600 dark:text-yellow-500 text-sm mb-6">
                             {{ noMarginCount }} row(s) don't have a margin.
