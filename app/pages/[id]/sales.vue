@@ -238,16 +238,10 @@
                     </div>
                 </template>
                     <div class="px-4 pb-4">
-                        <h3 class="font-semibold text-lg mb-2">New Resell</h3>
-                        <UTable sticky :data="responseData.newResellData" :columns="newResellColumns" class="flex-1 max-h-[800px] mb-2 [&_tr:has(.row-deleted)]:bg-red-50 dark:[&_tr:has(.row-deleted)]:bg-red-950/20 [&_tr:has(.row-no-margin)]:bg-yellow-50 dark:[&_tr:has(.row-no-margin)]:bg-yellow-900/20" />
+                        <UTable sticky :data="responseData.data" :columns="columns" class="flex-1 max-h-[800px] mb-2 [&_tr:has(.row-deleted)]:bg-red-50 dark:[&_tr:has(.row-deleted)]:bg-red-950/20 [&_tr:has(.row-no-margin)]:bg-yellow-50 dark:[&_tr:has(.row-no-margin)]:bg-yellow-900/20" />
                         <div v-if="noMarginCount > 0" class="alert alert-warning text-yellow-600 dark:text-yellow-500 text-sm mb-6">
                             {{ noMarginCount }} row(s) don't have a margin.
                         </div>
-                        
-                        <UDivider class="my-6" />
-
-                        <h3 class="font-semibold text-lg mb-2">Other Invoices</h3>
-                        <UTable sticky :data="responseData.otherData" :columns="otherColumns" class="flex-1 max-h-[800px] [&_tr:has(.row-deleted)]:bg-red-50 dark:[&_tr:has(.row-deleted)]:bg-red-950/20" />
                     </div>
 
                 </UCard>
@@ -284,21 +278,16 @@ const UAvatar = resolveComponent('UAvatar')
 
     const route = useRoute()
     const responseData = ref<InvoiceSalesResponseData['data']>({ 
-        newResellData: [], 
-        newResellTotalCommission: 0, 
-        newResellTotalDpp: 0, 
-        otherData: [], 
-        otherTotalCommission: 0, 
-        otherTotalDpp: 0, 
+        data: [], 
         totalCommission: 0, 
         totalDpp: 0 
     })
 
     const noMarginCount = computed(() => {
-        return responseData.value.newResellData.filter(item => !item.margin || Number(item.margin) === 0).length
+        return responseData.value.data?.filter(item => item.isNew && item.type === 'resell' && (!item.margin || Number(item.margin) === 0)).length || 0
     })
 
-    const createColumns = (isNewResell: boolean) => {
+    const createColumns = () => {
         const cols: TableColumn<InvoiceSalesData>[] = [
     {
         accessorKey: 'invoiceNumber',
@@ -310,7 +299,7 @@ const UAvatar = resolveComponent('UAvatar')
         },
         cell: ({ row }) => {
             const invoiceNum = row.original.invoiceNumber
-            const hasNoMargin = isNewResell && (!row.original.margin || Number(row.original.margin) === 0)
+            const hasNoMargin = row.original.isNew && row.original.type === 'resell' && (!row.original.margin || Number(row.original.margin) === 0)
             return h('a', { 
                 href: `https://isx.nusa.net.id/customer.php?module=customer&pid=printNewCustomerInvoice&invoiceNum=${invoiceNum}&urut=${row.original.position}&new=1&proforma=0&signature=0`,
                 target: '_blank',
@@ -411,66 +400,64 @@ const UAvatar = resolveComponent('UAvatar')
     }
 ]
 
-    if (isNewResell) {
-        cols.push(
-            {
-                accessorKey: 'modal',
-                header: 'Modal (1 License)',
-                cell: ({ row }) => {
-                const amount = Number.parseFloat(row.getValue('modal')) || 0
-                return new Intl.NumberFormat('id-ID', {
+    cols.push(
+        {
+            accessorKey: 'modal',
+            header: 'Modal (1 License)',
+            cell: ({ row }) => {
+            const amount = Number.parseFloat(row.getValue('modal')) || 0
+            return new Intl.NumberFormat('id-ID', {
+                style: 'currency',
+                currency: 'IDR'
+            }).format(amount)
+            },
+            footer: ({ table }) => {
+                const amount = table.getFilteredRowModel().rows.reduce((sum, row) => sum + (Number(row.original.modal) || 0), 0)
+    
+                return h('div', { class: 'text-right font-bold' }, new Intl.NumberFormat('id-ID', {
                     style: 'currency',
                     currency: 'IDR'
-                }).format(amount)
-                },
-                footer: ({ table }) => {
-                    const amount = table.getFilteredRowModel().rows.reduce((sum, row) => sum + (Number(row.original.modal) || 0), 0)
-        
-                    return h('div', { class: 'text-right font-bold' }, new Intl.NumberFormat('id-ID', {
-                        style: 'currency',
-                        currency: 'IDR'
-                    }).format(amount))
-                }
-            },
-            {
-                accessorKey: 'price',
-                header: 'Resell Price (1 License)',
-                cell: ({ row }) => {
-                const amount = Number.parseFloat(row.getValue('price')) || 0
-                return new Intl.NumberFormat('id-ID', {
-                    style: 'currency',
-                    currency: 'IDR'
-                }).format(amount)
-                },
-                footer: ({ table }) => {
-                    const amount = table.getFilteredRowModel().rows.reduce((sum, row) => sum + (Number(row.original.price) || 0), 0)
-        
-                    return h('div', { class: 'text-right font-bold' }, new Intl.NumberFormat('id-ID', {
-                        style: 'currency',
-                        currency: 'IDR'
-                    }).format(amount))
-                }
-            },
-            {
-                header: 'Margin',
-                meta: {
-                class: {
-                    th: 'text-right',
-                    td: 'text-right font-medium'
-                }
-                },
-                cell: ({ row }) => {
-                return h('div', { class: 'flex flex-col' }, [
-                    h('span', { class: 'text-sm text-highlighted' }, Intl.NumberFormat('id-ID', { style: 'decimal' }).format(Number(row.original.margin) || 0) + '%'),
-                    h('span', { class: 'text-sm' }, new Intl.NumberFormat('id-ID', {
-                        style: 'currency',
-                        currency: 'IDR'
-                    }).format(Number(row.original.markup) || 0))
-                ])
-                }
+                }).format(amount))
             }
-        )
-    }
+        },
+        {
+            accessorKey: 'price',
+            header: 'Resell Price (1 License)',
+            cell: ({ row }) => {
+            const amount = Number.parseFloat(row.getValue('price')) || 0
+            return new Intl.NumberFormat('id-ID', {
+                style: 'currency',
+                currency: 'IDR'
+            }).format(amount)
+            },
+            footer: ({ table }) => {
+                const amount = table.getFilteredRowModel().rows.reduce((sum, row) => sum + (Number(row.original.price) || 0), 0)
+    
+                return h('div', { class: 'text-right font-bold' }, new Intl.NumberFormat('id-ID', {
+                    style: 'currency',
+                    currency: 'IDR'
+                }).format(amount))
+            }
+        },
+        {
+            header: 'Margin',
+            meta: {
+            class: {
+                th: 'text-right',
+                td: 'text-right font-medium'
+            }
+            },
+            cell: ({ row }) => {
+            return h('div', { class: 'flex flex-col' }, [
+                h('span', { class: 'text-sm text-highlighted' }, Intl.NumberFormat('id-ID', { style: 'decimal' }).format(Number(row.original.margin) || 0) + '%'),
+                h('span', { class: 'text-sm' }, new Intl.NumberFormat('id-ID', {
+                    style: 'currency',
+                    currency: 'IDR'
+                }).format(Number(row.original.markup) || 0))
+            ])
+            }
+        }
+    )
 
     cols.push(
     {
@@ -566,8 +553,7 @@ const UAvatar = resolveComponent('UAvatar')
     return cols
 }
 
-const newResellColumns = computed(() => createColumns(true))
-const otherColumns = computed(() => createColumns(false))
+const columns = computed(() => createColumns())
 
 
 const employee = ref<Employee>()  
@@ -711,9 +697,9 @@ const fetchData = async () => {
     const additionalService = new AdditionalService()
     const currentPeriod = await additionalService.getCurrentPeriod()
 
-    if (currentPeriod?.start && currentPeriod?.end) {
-        const [startYear, startMonth, startDay] = currentPeriod.start.split('-').map(Number) as [number, number, number]
-        const [endYear, endMonth, endDay] = currentPeriod.end.split('-').map(Number) as [number, number, number]
+    if (currentPeriod?.data?.startDate && currentPeriod?.data?.endDate) {
+        const [startYear, startMonth, startDay] = currentPeriod.data.startDate.split('-').map(Number) as [number, number, number]
+        const [endYear, endMonth, endDay] = currentPeriod.data.endDate.split('-').map(Number) as [number, number, number]
         
         modelValue.value = {
             start: new CalendarDate(startYear, startMonth, startDay),

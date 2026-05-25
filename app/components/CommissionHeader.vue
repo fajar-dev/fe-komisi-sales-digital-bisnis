@@ -21,21 +21,69 @@
                     </div>
                 </div>
             </div>
-            <USelectMenu v-model="selectedYear" :items="yearItems" />
+            <div class="flex items-center gap-2">
+                <USelectMenu v-if="monthItems && monthItems.length" v-model="selectedMonthObject" :items="monthItems" option-attribute="label" class="w-44" />
+                <USelectMenu v-if="props.yearItems && props.yearItems.length" v-model="selectedYear" :items="props.yearItems" class="w-32" />
+            </div>
         </div>
     </div>
 </template>
 
 <script setup lang="ts">
 import type { Employee } from '~/types/employee'
+import { AdditionalService } from '~/services/additional-service'
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
     employee: Employee | undefined
     subtitle: string
-    yearItems: number[]
-}>()
+    yearItems?: number[]
+}>(), {
+    yearItems: () => [2026, 2027, 2028, 2029, 2030]
+})
 
 const selectedYear = defineModel<number>('year')
+const selectedMonth = defineModel<number>('month')
+
+const monthItems = [
+    { label: 'January', value: 1 },
+    { label: 'February', value: 2 },
+    { label: 'March', value: 3 },
+    { label: 'April', value: 4 },
+    { label: 'May', value: 5 },
+    { label: 'June', value: 6 },
+    { label: 'July', value: 7 },
+    { label: 'August', value: 8 },
+    { label: 'September', value: 9 },
+    { label: 'October', value: 10 },
+    { label: 'November', value: 11 },
+    { label: 'December', value: 12 },
+]
+
+const selectedMonthObject = computed({
+    get() {
+        return monthItems.find(item => item.value === selectedMonth.value)
+    },
+    set(val) {
+        selectedMonth.value = val?.value
+    }
+})
+
+const fetchDefaultPeriod = async () => {
+    try {
+        const additionalService = new AdditionalService()
+        const response = await additionalService.getCurrentPeriod()
+        if (response?.data) {
+            if (!selectedYear.value) selectedYear.value = response.data.year
+            if (!selectedMonth.value) selectedMonth.value = response.data.month
+        }
+    } catch (error) {
+        console.error("Failed to fetch default period:", error)
+    }
+}
+
+onMounted(() => {
+    fetchDefaultPeriod()
+})
 
 const router = useRouter()
 

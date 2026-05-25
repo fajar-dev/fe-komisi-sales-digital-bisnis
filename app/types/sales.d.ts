@@ -46,12 +46,7 @@ export interface InvoiceSalesResponseData {
     success: boolean;
     message: string;
     data: {
-        newResellData: InvoiceSalesData[];
-        newResellTotalCommission: number;
-        newResellTotalDpp: number;
-        otherData: InvoiceSalesData[];
-        otherTotalCommission: number;
-        otherTotalDpp: number;
+        data: InvoiceSalesData[];
         totalCommission: number;
         totalDpp: number;
     };

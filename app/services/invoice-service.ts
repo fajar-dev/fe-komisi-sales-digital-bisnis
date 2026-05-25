@@ -33,7 +33,7 @@ export class InvoiceService {
 
     async getInvoiceImplementator(employeeId: string, params: ImplementatorInvoiceQueryParams): Promise<InvoiceImplementatorResponseData> {
         try {
-            const response = await apiService.client.get(`/implementator/${employeeId}/invoice`, {
+            const response = await apiService.client.get(`/invoice/${employeeId}/implementator`, {
                 headers: {
                     authorization: `Bearer ${useAuth().state.token}`
                 },

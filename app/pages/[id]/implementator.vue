@@ -4,165 +4,136 @@
         <CommissionHeader
             :employee="employee"
             v-model:year="year"
-            :year-items="items"
+            v-model:month="month"
             subtitle="Monthly implementator commission heatmap 🔥"
         />
 
-        <div class="py-2">
-            <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                <UPageCard
-                    v-for="card in monthcard"
-                    :key="card.mounth"
-                    :title="String(card.total)"
-                    :description="card.mounth"
-            >
-            </UPageCard>
-        </div>
-        </div>
-
-        <div class="py-2">
-        <div class="grid grid-cols-1 md:grid-cols-1 gap-4">
-            <UCard>
-            <template #header>
-                <div class="lg:flex items-center justify-between">
-                    <div>
-                        <h2>Monthly Commission</h2>
-                        <p class="text-sm text-gray-500 dark:text-gray-400">
-                            Total monthly commission
-                        </p>
+        <!-- Metrics Summary Cards using Nuxt UI -->
+        <div class="py-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <!-- Commission Card -->
+                <UCard>
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm font-semibold text-gray-500 dark:text-gray-400 flex items-center gap-2">
+                            <UIcon name="i-lucide-wallet" class="w-5 h-5 text-blue-500 dark:text-blue-400" />
+                            Total Commission
+                        </span>
+                        <UBadge :color="commissionGrowth.isUp ? 'success' : 'error'" variant="subtle" size="sm" class="flex items-center gap-0.5 font-bold">
+                            <UIcon :name="commissionGrowth.isUp ? 'i-lucide-trending-up' : 'i-lucide-trending-down'" class="w-3.5 h-3.5" />
+                            {{ commissionGrowth.isUp ? '+' : '' }}{{ commissionGrowth.percent }}%
+                        </UBadge>
                     </div>
-                    <div>
-                        <h1 class="font-bold text-2xl">Total: {{ new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(totalCommissionData.reduce((total, item) => total + item.total, 0)) }}</h1>
+                    <div class="mt-2">
+                        <div class="text-2xl font-bold text-gray-900 dark:text-white leading-tight">
+                            {{ formatCurrency(totalCommission) }}
+                        </div>
                     </div>
-                </div>
-            </template>
-                 <LineChart
-                    :data="totalCommissionData"
-                    :height="280"
-                    y-label="Total Commission"
-                    :x-num-ticks="4"
-                    :y-num-ticks="4"
-                    :categories="totalCommissionChart"
-                    :x-formatter="xFormatterTotalCommission"
-                    :y-formatter="yFormatterCommission"
-                    :y-grid-line="true"
-                    :curve-type="CurveType.MonotoneX"
-                    :legend-position="LegendPosition.TopRight"
-                    :hide-legend="false"
-                />
-            </UCard>
-        </div>
-        </div>
+                    <div class="mt-2 flex flex-col">
+                        <span class="text-[11px] text-gray-500 dark:text-gray-400">
+                            Pertumbuhan: {{ commissionGrowth.isUp ? '+' : '' }} {{ formatCurrency(commissionGrowth.diff) }}
+                        </span>
+                        <span class="text-[11px] text-gray-400 dark:text-gray-500">
+                            Bulan lalu: {{ formatCurrency(prevCommission) }}
+                        </span>
+                    </div>
+                </UCard>
 
-        <div class="py-2">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <UCard>
-            <template #header>
-                <h2>Commission</h2>
-                <p class="text-sm text-gray-500 dark:text-gray-400">
-                Sales Commission
-                </p>
-            </template>
-                <AreaChart
-                    :key="colorMode.value"
-                    :data="commissionData"
-                    :height="280"
-                    :categories="commissionChart"
-                    :stacked="true"
-                    :x-formatter="xFormatterCommission"
-                    :y-formatter="yFormatterCommission"
-                    :curve-type="CurveType.MonotoneX"
-                    :legend-position="LegendPosition.TopRight"
-                    :hide-legend="false"
-                    :y-grid-line="true"
-                    :x-grid-line="false"
-                />
-            </UCard>
-            <UCard>
-            <template #header>
-                <h2>Customer</h2>
-                <p class="text-sm text-gray-500 dark:text-gray-400">
-                Customer Count
-                </p>
-            </template>
-                <BarChart
-                    :data="customerData"
-                    :height="300"
-                    :categories="customerChart"
-                    :y-axis="['solo', 'booster', 'recurring']"
-                    :group-padding="0"
-                    :bar-padding="0.2"
-                    :x-num-ticks="6"
-                    :radius="4"
-                    :x-formatter="xFormatter"
-                    :y-formatter="yFormatter"
-                    :legend-position="LegendPosition.TopRight"
-                    :hide-legend="false"
-                    :y-grid-line="true"
-                />
-            </UCard>
-        </div>
-        </div>
+                <!-- MRC Card -->
+                <UCard>
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm font-semibold text-gray-500 dark:text-gray-400 flex items-center gap-2">
+                            <UIcon name="i-lucide-trending-up" class="w-5 h-5 text-emerald-500 dark:text-emerald-400" />
+                            Total MRC
+                        </span>
+                        <UBadge :color="mrcGrowth.isUp ? 'success' : 'error'" variant="subtle" size="sm" class="flex items-center gap-0.5 font-bold">
+                            <UIcon :name="mrcGrowth.isUp ? 'i-lucide-trending-up' : 'i-lucide-trending-down'" class="w-3.5 h-3.5" />
+                            {{ mrcGrowth.isUp ? '+' : '' }}{{ mrcGrowth.percent }}%
+                        </UBadge>
+                    </div>
+                    <div class="mt-2">
+                        <div class="text-2xl font-bold text-gray-900 dark:text-white leading-tight">
+                            {{ formatCurrency(totalMrc) }}
+                        </div>
+                    </div>
+                    <div class="mt-2 flex flex-col">
+                        <span class="text-[11px] text-gray-500 dark:text-gray-400">
+                            Pertumbuhan: {{ mrcGrowth.isUp ? '+' : '' }} {{ formatCurrency(mrcGrowth.diff) }}
+                        </span>
+                        <span class="text-[11px] text-gray-400 dark:text-gray-500">
+                            Bulan lalu: {{ formatCurrency(prevMrc) }}
+                        </span>
+                    </div>
+                </UCard>
 
+                <!-- Subscription Card -->
+                <UCard>
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm font-semibold text-gray-500 dark:text-gray-400 flex items-center gap-2">
+                            <UIcon name="i-lucide-coins" class="w-5 h-5 text-purple-500 dark:text-purple-400" />
+                            Total Subscription
+                        </span>
+                        <UBadge :color="subscriptionGrowth.isUp ? 'success' : 'error'" variant="subtle" size="sm" class="flex items-center gap-0.5 font-bold">
+                            <UIcon :name="subscriptionGrowth.isUp ? 'i-lucide-trending-up' : 'i-lucide-trending-down'" class="w-3.5 h-3.5" />
+                            {{ subscriptionGrowth.isUp ? '+' : '' }}{{ subscriptionGrowth.percent }}%
+                        </UBadge>
+                    </div>
+                    <div class="mt-2">
+                        <div class="text-2xl font-bold text-gray-900 dark:text-white leading-tight">
+                            {{ formatCurrency(totalSubscription) }}
+                        </div>
+                    </div>
+                    <div class="mt-2 flex flex-col">
+                        <span class="text-[11px] text-gray-500 dark:text-gray-400">
+                            Pertumbuhan: {{ subscriptionGrowth.isUp ? '+' : '' }} {{ formatCurrency(subscriptionGrowth.diff) }}
+                        </span>
+                        <span class="text-[11px] text-gray-400 dark:text-gray-500">
+                            Bulan lalu: {{ formatCurrency(prevSubscription) }}
+                        </span>
+                    </div>
+                </UCard>
+
+                <!-- Churn Card -->
+                <UCard>
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm font-semibold text-gray-500 dark:text-gray-400 flex items-center gap-2">
+                            <UIcon name="i-lucide-user-x" class="w-5 h-5 text-red-500 dark:text-red-400" />
+                            Active Churns
+                        </span>
+                        <UBadge :color="churnGrowth.diff <= 0 ? 'success' : 'error'" variant="subtle" size="sm" class="flex items-center gap-0.5 font-bold">
+                            <UIcon :name="churnGrowth.diff > 0 ? 'i-lucide-trending-up' : 'i-lucide-trending-down'" class="w-3.5 h-3.5" />
+                            {{ churnGrowth.diff > 0 ? '+' : '' }}{{ churnGrowth.diff }}
+                        </UBadge>
+                    </div>
+                    <div class="mt-2">
+                        <div class="text-2xl font-bold text-gray-900 dark:text-white leading-tight">
+                            {{ churnCount }}
+                        </div>
+                    </div>
+                    <div class="mt-2 flex flex-col">
+                        <span class="text-[11px] text-gray-500 dark:text-gray-400">
+                            Perubahan: {{ churnGrowth.diff > 0 ? '+' : '' }}{{ churnGrowth.diff }}
+                        </span>
+                        <span class="text-[11px] text-gray-400 dark:text-gray-500">
+                            Bulan lalu: {{ prevChurnCount }}
+                        </span>
+                    </div>
+                </UCard>
+            </div>
+        </div>
+        
         <div class="py-2">
             <div class="grid grid-cols-1">
                 <UCard>
-                <template #header>
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <h2>Invoice</h2>
-                            <p class="text-sm text-gray-500 dark:text-gray-400">
-                            Customer Invoice
-                            </p>
-                        </div>
-                        <UPopover>
-                            <UButton color="neutral" variant="subtle" icon="i-lucide-calendar">
-                            <template v-if="modelValue.start">
-                                <template v-if="modelValue.end">
-                                {{ df.format(modelValue.start.toDate(getLocalTimeZone())) }} - {{ df.format(modelValue.end.toDate(getLocalTimeZone())) }}
-                                </template>
-
-                                <template v-else>
-                                {{ df.format(modelValue.start.toDate(getLocalTimeZone())) }}
-                                </template>
-                            </template>
-                            <template v-else>
-                                Pick a date
-                            </template>
-                            </UButton>
-
-                            <template #content>
-                            <UCalendar v-model="modelValue" class="p-2" :number-of-months="2" range />
-                            </template>
-                        </UPopover>
-                    </div>
-                </template>
                     <UTable sticky :data="invoiceData" :columns="columns" class="flex-1 max-h-[800px]" />
                 </UCard>
             </div>
         </div>
     </UContainer>
-</template>
-
-<script setup lang="ts">
+</template><script setup lang="ts">
 import { AdditionalService } from '~/services/additional-service'
-import { CommissionService } from '~/services/commission-service'
 import { EmployeeService } from '~/services/employee-service'
 import { InvoiceService } from '~/services/invoice-service'
 import type { Employee } from '~/types/employee'
-
-import { CalendarDate, DateFormatter, getLocalTimeZone } from '@internationalized/date'
-
-const df = new DateFormatter('en-US', {
-  dateStyle: 'medium'
-})
-
-const today = new Date()
-const modelValue = shallowRef({
-  start: new CalendarDate(today.getFullYear(), today.getMonth() + 1, 1),
-  end: new CalendarDate(today.getFullYear(), today.getMonth() + 1, today.getDate())
-})
-
 import { h, resolveComponent } from 'vue'
 import type { TableColumn } from '@nuxt/ui'
 import type { InvoiceImplementatorData } from '~/types/implementator'
@@ -176,118 +147,106 @@ const columns: TableColumn<InvoiceImplementatorData>[] = [
     {
         accessorKey: 'invoiceNumber',
         header: 'Invoice Number',
-        meta: {
-        class: {
-            td: 'font-bold'
-        }
-        },
         cell: ({ row }) => {
             const invoiceNum = row.original.invoiceNumber
-            return h('a', { 
-                href: `https://isx.nusa.net.id/customer.php?module=customer&pid=printNewCustomerInvoice&invoiceNum=${invoiceNum}&urut=${row.original.position}&new=1&proforma=0&signature=0`,
-                target: '_blank',
-                class: 'text-blue-500 hover:underline'
-            }, `#${invoiceNum}`)
+            return h('div', { class: 'flex flex-col' }, [
+                h('a', { 
+                    href: `https://isx.nusa.net.id/customer.php?module=customer&pid=printNewCustomerInvoice&invoiceNum=${invoiceNum}&urut=${row.original.sequenceNumber}&new=1&proforma=0&signature=0`,
+                    target: '_blank',
+                    class: ['text-blue-500 hover:underline font-bold']
+                }, row.original.invoiceNumber),
+                h('span', { class: 'text-sm whitespace-normal break-words' }, row.original.ai)
+            ])
         }
     },
     {
         accessorKey: 'paidDate',
         header: 'Paid Date',
         cell: ({ row }) => {
-        return new Date(row.getValue('paidDate')).toLocaleString('en-US', {
-            day: 'numeric',
-            month: 'short',
-            year: 'numeric'
-        })
+            return new Date(row.getValue('paidDate')).toLocaleString('en-US', {
+                day: 'numeric',
+                month: 'short',
+                year: 'numeric'
+            })
         }
     },
     {
         id: 'status',
         header: 'Status',
         cell: ({ row }) => {
-        if (row.original.isNew) {
-            return h(UBadge, { color: 'success', variant: 'subtle' }, () => 'New')
-        }
-        if (row.original.isUpgrade) {
-            return h(UBadge, { color: 'warning', variant: 'subtle' }, () => 'Prorata')
-        }
-        if (row.original.isTermin) {
-            return h(UBadge, { color: 'warning', variant: 'subtle' }, () => 'Termin')
-        }
-        return h(UBadge, { color: 'info', variant: 'subtle' }, () => 'Recurring')
+            const status = row.original.status
+            if (status === 'new') {
+                return h(UBadge, { color: 'success', variant: 'subtle' }, () => 'New')
+            }
+            if (status === 'upgrade') {
+                return h(UBadge, { color: 'warning', variant: 'subtle' }, () => 'Prorata')
+            }
+            if (status === 'termin') {
+                return h(UBadge, { color: 'warning', variant: 'subtle' }, () => 'Termin')
+            }
+            return h(UBadge, { color: 'info', variant: 'subtle' }, () => 'Recurring')
         }
     },
     {
         header: 'Service',
+        meta: {
+            class: {
+                th: 'min-w-[250px]',
+                td: 'min-w-[250px]'
+            }
+        },
         cell: ({ row }) => {
-        return h('div', { class: 'flex flex-col' }, [
-            h('a', { 
-                href: `https://isx.nusa.net.id/v2/customer/service/${row.original.customerServiceId}/detail`,
-                target: '_blank',
-                class: ['text-blue-500 hover:underline font-semibold']
-            }, row.original.customerServiceId),
-            h('span', { class: 'text-sm whitespace-normal break-words' }, row.original.serviceName)
-        ])
+            return h('div', { class: 'flex flex-col' }, [
+                h('a', { 
+                    href: `https://isx.nusa.net.id/v2/customer/service/${row.original.customerServiceId}/detail`,
+                    target: '_blank',
+                    class: ['text-blue-500 hover:underline font-semibold']
+                }, row.original.customerServiceId),
+                h('span', { class: 'text-sm whitespace-normal break-words' }, row.original.serviceName)
+            ])
         }
     },
     {
         header: 'Customer',
+        meta: {
+            class: {
+                th: 'min-w-[250px]',
+                td: 'min-w-[250px]'
+            }
+        },
         cell: ({ row }) => {
-        return h('div', { class: 'flex flex-col' }, [
-            h('a', { 
-                href: `https://isx.nusa.net.id/customer.php?custId=${row.original.customerId}&pid=profile`,
-                target: '_blank',
-                class: ['text-blue-500 hover:underline font-semibold']
-            }, row.original.customerId),
-            h('span', { class: 'text-sm whitespace-normal break-words' }, row.original.customerCompany)
-        ])
+            return h('div', { class: 'flex flex-col' }, [
+                h('a', { 
+                    href: `https://isx.nusa.net.id/customer.php?custId=${row.original.customerId}&pid=profile`,
+                    target: '_blank',
+                    class: ['text-blue-500 hover:underline font-semibold']
+                }, row.original.customerId),
+                h('span', { class: 'text-sm whitespace-normal break-words' }, row.original.customerCompany)
+            ])
         }
     },
     {
         header: 'Sales',
         cell: ({ row }) => {
-        if (!row.original.sales.id) {
-            return '-'
-        }
-        return h('div', { class: 'flex items-center gap-3' }, [
-            h(UAvatar, {
-            src: row.original.sales.photo,
-            size: 'lg'
-            }),
-            h('div', undefined, [
-            h('p', { class: 'font-medium text-highlighted' }, row.original.sales.name),
-            h('p', { class: '' }, row.original.sales.id)
+            const sales = row.original.salesId
+            if (!sales || !sales.employeeId) {
+                return '-'
+            }
+            return h('div', { class: 'flex items-center gap-3' }, [
+                h(UAvatar, {
+                    src: sales.photoProfile || undefined,
+                    size: 'lg'
+                }),
+                h('div', undefined, [
+                    h('p', { class: 'font-medium text-highlighted' }, sales.name),
+                    h('p', { class: '' }, sales.employeeId)
+                ])
             ])
-        ])
         }
     },
     {
-        accessorKey: 'dpp',
-        header: 'DPP',
-        meta: {
-        class: {
-            th: 'text-right',
-            td: 'text-right font-medium'
-        }
-        },
-        cell: ({ row }) => {
-        const amount = Number.parseFloat(row.getValue('dpp'))
-        return new Intl.NumberFormat('id-ID', {
-            style: 'currency',
-            currency: 'IDR'
-        }).format(amount)
-        },
-        footer: ({ table }) => {
-            const rows = table.getFilteredRowModel().rows
-            const total = rows.reduce((acc, row) => acc + (Number(row.original.dpp) || 0), 0)
-            return h('div', { class: 'text-right font-bold' }, new Intl.NumberFormat('id-ID', {
-                style: 'currency',
-                currency: 'IDR'
-            }).format(total))
-        }
-    },
-    {
-        header: 'Month Period',
+        accessorKey: 'subscription',
+        header: 'Subscription',
         meta: {
             class: {
                 th: 'text-right',
@@ -295,7 +254,77 @@ const columns: TableColumn<InvoiceImplementatorData>[] = [
             }
         },
         cell: ({ row }) => {
-        return row.original.monthPeriod
+            const amount = Number.parseFloat(row.getValue('subscription'))
+            return new Intl.NumberFormat('id-ID', {
+                style: 'currency',
+                currency: 'IDR',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+            }).format(amount)
+        },
+        footer: ({ table }) => {
+            const rows = table.getFilteredRowModel().rows
+            const total = rows.reduce((acc, row) => acc + (Number(row.original.subscription) || 0), 0)
+            return h('div', { class: 'text-right font-bold' }, new Intl.NumberFormat('id-ID', {
+                style: 'currency',
+                currency: 'IDR',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+            }).format(total))
+        }
+    },
+    {
+        accessorKey: 'mrc',
+        header: 'MRC',
+        meta: {
+            class: {
+                th: 'text-right',
+                td: 'text-right font-medium'
+            }
+        },
+        cell: ({ row }) => {
+            const amount = Number.parseFloat(row.getValue('mrc'))
+            return new Intl.NumberFormat('id-ID', {
+                style: 'currency',
+                currency: 'IDR',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+            }).format(amount)
+        },
+        footer: ({ table }) => {
+            const rows = table.getFilteredRowModel().rows
+            const total = rows.reduce((acc, row) => acc + (Number(row.original.mrc) || 0), 0)
+            return h('div', { class: 'text-right font-bold' }, new Intl.NumberFormat('id-ID', {
+                style: 'currency',
+                currency: 'IDR',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+            }).format(total))
+        }
+    },
+    {
+        header: 'Month Period',
+        meta: {
+            class: {
+                th: 'text-center',
+                td: 'text-center font-medium'
+            }
+        },
+        cell: ({ row }) => {
+            const period = parseFloat(row.original.monthPeriod)
+            return isNaN(period) ? '-' : Math.round(period)
+        }
+    },
+    {
+        header: 'Total Account',
+        meta: {
+            class: {
+                th: 'text-center',
+                td: 'text-center font-medium'
+            }
+        },
+        cell: ({ row }) => {
+            return row.original.totalAccount
         }
     },
     {
@@ -307,20 +336,24 @@ const columns: TableColumn<InvoiceImplementatorData>[] = [
             }
         },
         cell: ({ row }) => {
-        return h('div', { class: 'flex flex-col' }, [
-            h('span', { class: 'text-sm text-highlighted' }, Intl.NumberFormat('id-ID', { style: 'decimal' }).format(row.original.implementatorCommissionPercentage) + '%'),
-            h('span', { class: 'text-sm' }, new Intl.NumberFormat('id-ID', {
-                style: 'currency',
-                currency: 'IDR'
-            }).format(row.original.implementatorCommission))
-        ])
+            return h('div', { class: 'flex flex-col' }, [
+                h('span', { class: 'text-sm text-highlighted' }, Intl.NumberFormat('id-ID', { style: 'decimal' }).format(row.original.commissionPercentage) + '%'),
+                h('span', { class: 'text-sm' }, new Intl.NumberFormat('id-ID', {
+                    style: 'currency',
+                    currency: 'IDR',
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 0
+                }).format(row.original.commission))
+            ])
         },
         footer: ({ table }) => {
             const rows = table.getFilteredRowModel().rows
-            const total = rows.reduce((acc, row) => acc + (Number(row.original.implementatorCommission) || 0), 0)
+            const total = rows.reduce((acc, row) => acc + (Number(row.original.commission) || 0), 0)
             return h('div', { class: 'text-right font-bold' }, new Intl.NumberFormat('id-ID', {
                 style: 'currency',
-                currency: 'IDR'
+                currency: 'IDR',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
             }).format(total))
         }
     }
@@ -329,147 +362,128 @@ const columns: TableColumn<InvoiceImplementatorData>[] = [
 const route = useRoute()
 const employee = ref<Employee>()  
 
-// Year Select
+const year = ref<number>()
+const month = ref<number>()
 
-const items = ref([2026, 2027, 2028, 2029, 2030])
-const year = ref(new Date().getFullYear())
+const totalCommission = ref(0)
+const totalMrc = ref(0)
+const totalSubscription = ref(0)
+const churnCount = ref(0)
 
-// Commission Chart (Area Chart)
+const prevCommission = ref(0)
+const prevMrc = ref(0)
+const prevSubscription = ref(0)
+const prevChurnCount = ref(0)
 
-const commissionData = ref<{
-    date: string;
-    solo: number;
-    booster: number;
-    recurring: number;
-}[]>([])
-
-const colorMode = useColorMode()
-
-const commissionChart: Record<string, BulletLegendItemInterface> = {
-    solo: { name: 'Base Commission', color: '#3b82f6' },
-    booster: { name: 'Retention Booster', color: '#22c55e' },
-    recurring: { name: 'Recurring', color: '#f97316' },
+const formatCurrency = (value: number): string => {
+    return new Intl.NumberFormat('id-ID', { 
+        style: 'currency', 
+        currency: 'IDR', 
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0 
+    }).format(value)
 }
 
-const xFormatterCommission = (tick: number, _i?: number, _ticks?: number[]): string => {
-  return commissionData.value[tick]?.date ?? ''
-}
+const commissionGrowth = computed(() => {
+    const diff = totalCommission.value - prevCommission.value
+    const percent = prevCommission.value > 0 ? (diff / prevCommission.value) * 100 : 0
+    return {
+        diff,
+        percent: Math.round(percent * 10) / 10,
+        isUp: diff >= 0
+    }
+})
 
-const yFormatterCommission = (value: number): string => {
-  return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(value)
-}
+const mrcGrowth = computed(() => {
+    const diff = totalMrc.value - prevMrc.value
+    const percent = prevMrc.value > 0 ? (diff / prevMrc.value) * 100 : 0
+    return {
+        diff,
+        percent: Math.round(percent * 10) / 10,
+        isUp: diff >= 0
+    }
+})
 
-// Total Commission Chart (Line Chart)
+const subscriptionGrowth = computed(() => {
+    const diff = totalSubscription.value - prevSubscription.value
+    const percent = prevSubscription.value > 0 ? (diff / prevSubscription.value) * 100 : 0
+    return {
+        diff,
+        percent: Math.round(percent * 10) / 10,
+        isUp: diff >= 0
+    }
+})
 
-const totalCommissionData = ref<{
-    date: string;
-    total: number;
-}[]>([])
-
-const totalCommissionChart: Record<string, BulletLegendItemInterface> = {
-    total: { name: 'Total Commission', color: '#10b981' },
-}
-
-const xFormatterTotalCommission = (tick: number, _i?: number, _ticks?: number[]): string => {
-  return totalCommissionData.value[tick]?.date ?? ''
-}
-
-// Customer Chart (Bar Chart)
-
-const customerData = ref<{
-    month: string;
-    solo: number;
-    booster: number;
-    recurring: number;
-}[]>([])
-
-const customerChart = {
-    solo: { name: 'Base Commission', color: '#3b82f6' },
-    booster: { name: 'Retention Booster', color: '#22c55e' },
-    recurring: { name: 'Recurring', color: '#f97316' },
-}
-
-const xFormatter = (i: number): string => customerData.value[i]?.month ?? ''
-const yFormatter = (tick: number) => tick.toString()
-
-// Month Card
-
-const monthcard = ref<{ mounth: string; total: string }[]>([])
+const churnGrowth = computed(() => {
+    const diff = churnCount.value - prevChurnCount.value
+    return {
+        diff,
+        isUp: diff > 0
+    }
+})
 
 const fetchData = async () => {
     const additionalService = new AdditionalService()
-    const currentPeriod = await additionalService.getCurrentPeriod()
+    const currentPeriod = await additionalService.getCurrentPeriod(year.value, month.value)
 
-    if (currentPeriod?.start && currentPeriod?.end) {
-        const [startYear, startMonth, startDay] = currentPeriod.start.split('-').map(Number) as [number, number, number]
-        const [endYear, endMonth, endDay] = currentPeriod.end.split('-').map(Number) as [number, number, number]
-        
-        modelValue.value = {
-            start: new CalendarDate(startYear, startMonth, startDay),
-            end: new CalendarDate(endYear, endMonth, endDay)
-        }
+    if (currentPeriod?.data) {
+        if (!year.value) year.value = currentPeriod.data.year
+        if (!month.value) month.value = currentPeriod.data.month
     }
 
     const employeeService = new EmployeeService()
     const employeeData = await employeeService.getEmployee(route.params.id as string)
     employee.value = employeeData.data
-
-    const commissionService = new CommissionService()
-    const data = await commissionService.implementatorCommission(route.params.id as string, { year: year.value })
-    monthcard.value = data.data.data.map((item) => ({
-        mounth: item.month,
-        total: new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(item.total),
-    }))
-    commissionData.value = data.data.data.map((item) => {
-        const solo = item.detail.find(d => d.name === 'Base Commission')
-        const booster = item.detail.find(d => d.name === 'Retention Booster')
-        const recurring = item.detail.find(d => d.name === 'Recurring')
-        return {
-            date: item.month,
-            solo: solo?.total ?? 0,
-            booster: booster?.total ?? 0,
-            recurring: recurring?.total ?? 0,
-        }
-    }).filter(item => (item.solo + item.booster + item.recurring) > 0)
-    totalCommissionData.value = data.data.data.map((item) => ({
-        date: item.month,
-        total: item.total
-    })).filter(item => item.total > 0)
-    customerData.value = data.data.data.map((item) => {
-        const solo = item.detail.find(d => d.name === 'Base Commission')
-        const booster = item.detail.find(d => d.name === 'Retention Booster')
-        const recurring = item.detail.find(d => d.name === 'Recurring')
-        return {
-            month: item.month,
-            solo: solo?.count ?? 0,
-            booster: booster?.count ?? 0,
-            recurring: recurring?.count ?? 0,
-        }
-    }).filter(item => (item.solo + item.booster + item.recurring) > 0)
-
-
 }
 
 const fetchInvoiceData = async () => {
-    if (!modelValue.value.start || !modelValue.value.end) return
+    if (!year.value || !month.value) return
 
     const invoiceService = new InvoiceService()
+    
+    // Fetch current period data
     const response = await invoiceService.getInvoiceImplementator(route.params.id as string, {
-        startDate: modelValue.value.start.toString(),
-        endDate: modelValue.value.end.toString()
+        month: month.value,
+        year: year.value
     })
-    invoiceData.value = response.data.data
+    invoiceData.value = response.data.invoice || []
+    totalCommission.value = response.data.totalCommission || 0
+    totalMrc.value = response.data.totalMrc || 0
+    totalSubscription.value = response.data.totalSubscription || 0
+    churnCount.value = response.data.churnCount || 0
+
+    // Fetch previous period data for dynamic calculations
+    const prevMonthVal = month.value === 1 ? 12 : month.value - 1
+    const prevYearVal = month.value === 1 ? year.value - 1 : year.value
+
+    try {
+        const prevResponse = await invoiceService.getInvoiceImplementator(route.params.id as string, {
+            month: prevMonthVal,
+            year: prevYearVal
+        })
+        if (prevResponse?.data) {
+            prevCommission.value = prevResponse.data.totalCommission || 0
+            prevMrc.value = prevResponse.data.totalMrc || 0
+            prevSubscription.value = prevResponse.data.totalSubscription || 0
+            prevChurnCount.value = prevResponse.data.churnCount || 0
+        } else {
+            prevCommission.value = 0
+            prevMrc.value = 0
+            prevSubscription.value = 0
+            prevChurnCount.value = 0
+        }
+    } catch (e) {
+        console.error("Failed to fetch previous month data:", e)
+        prevCommission.value = 0
+        prevMrc.value = 0
+        prevSubscription.value = 0
+        prevChurnCount.value = 0
+    }
 }
 
-watch(modelValue, () => {
+watch([year, month], () => {
     fetchInvoiceData()
 })
 
-watch(year, () => {
-    fetchData()
-})
-
 fetchData()
-fetchInvoiceData()
-
 </script>

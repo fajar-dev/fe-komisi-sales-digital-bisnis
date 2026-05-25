@@ -1,4 +1,11 @@
 export interface currentPeriod {
-    start: string;
-    end: string;
+    success: boolean;
+    statusCode: number;
+    message: string;
+    data: {
+        year: number;
+        month: number;
+        startDate: string;
+        endDate: string;
+    }
 }
