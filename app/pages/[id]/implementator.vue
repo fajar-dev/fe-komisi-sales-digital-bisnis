@@ -15,26 +15,14 @@
                 <UCard>
                     <div class="flex items-center justify-between">
                         <span class="text-sm font-semibold text-gray-500 dark:text-gray-400 flex items-center gap-2">
-                            <UIcon name="i-lucide-wallet" class="w-5 h-5 text-blue-500 dark:text-blue-400" />
                             Total Commission
                         </span>
-                        <UBadge :color="commissionGrowth.isUp ? 'success' : 'error'" variant="subtle" size="sm" class="flex items-center gap-0.5 font-bold">
-                            <UIcon :name="commissionGrowth.isUp ? 'i-lucide-trending-up' : 'i-lucide-trending-down'" class="w-3.5 h-3.5" />
-                            {{ commissionGrowth.isUp ? '+' : '' }}{{ commissionGrowth.percent }}%
-                        </UBadge>
+                        <UIcon name="i-lucide-wallet" class="w-6 h-6 text-blue-500 dark:text-blue-400" />
                     </div>
                     <div class="mt-2">
                         <div class="text-2xl font-bold text-gray-900 dark:text-white leading-tight">
                             {{ formatCurrency(totalCommission) }}
                         </div>
-                    </div>
-                    <div class="mt-2 flex flex-col">
-                        <span class="text-[11px] text-gray-500 dark:text-gray-400">
-                            Pertumbuhan: {{ commissionGrowth.isUp ? '+' : '' }} {{ formatCurrency(commissionGrowth.diff) }}
-                        </span>
-                        <span class="text-[11px] text-gray-400 dark:text-gray-500">
-                            Bulan lalu: {{ formatCurrency(prevCommission) }}
-                        </span>
                     </div>
                 </UCard>
 
@@ -42,26 +30,14 @@
                 <UCard>
                     <div class="flex items-center justify-between">
                         <span class="text-sm font-semibold text-gray-500 dark:text-gray-400 flex items-center gap-2">
-                            <UIcon name="i-lucide-trending-up" class="w-5 h-5 text-emerald-500 dark:text-emerald-400" />
                             Total MRC
                         </span>
-                        <UBadge :color="mrcGrowth.isUp ? 'success' : 'error'" variant="subtle" size="sm" class="flex items-center gap-0.5 font-bold">
-                            <UIcon :name="mrcGrowth.isUp ? 'i-lucide-trending-up' : 'i-lucide-trending-down'" class="w-3.5 h-3.5" />
-                            {{ mrcGrowth.isUp ? '+' : '' }}{{ mrcGrowth.percent }}%
-                        </UBadge>
+                        <UIcon name="i-lucide-trending-up" class="w-6 h-6 text-emerald-500 dark:text-emerald-400" />
                     </div>
                     <div class="mt-2">
                         <div class="text-2xl font-bold text-gray-900 dark:text-white leading-tight">
                             {{ formatCurrency(totalMrc) }}
                         </div>
-                    </div>
-                    <div class="mt-2 flex flex-col">
-                        <span class="text-[11px] text-gray-500 dark:text-gray-400">
-                            Pertumbuhan: {{ mrcGrowth.isUp ? '+' : '' }} {{ formatCurrency(mrcGrowth.diff) }}
-                        </span>
-                        <span class="text-[11px] text-gray-400 dark:text-gray-500">
-                            Bulan lalu: {{ formatCurrency(prevMrc) }}
-                        </span>
                     </div>
                 </UCard>
 
@@ -69,26 +45,14 @@
                 <UCard>
                     <div class="flex items-center justify-between">
                         <span class="text-sm font-semibold text-gray-500 dark:text-gray-400 flex items-center gap-2">
-                            <UIcon name="i-lucide-coins" class="w-5 h-5 text-purple-500 dark:text-purple-400" />
                             Total Subscription
                         </span>
-                        <UBadge :color="subscriptionGrowth.isUp ? 'success' : 'error'" variant="subtle" size="sm" class="flex items-center gap-0.5 font-bold">
-                            <UIcon :name="subscriptionGrowth.isUp ? 'i-lucide-trending-up' : 'i-lucide-trending-down'" class="w-3.5 h-3.5" />
-                            {{ subscriptionGrowth.isUp ? '+' : '' }}{{ subscriptionGrowth.percent }}%
-                        </UBadge>
+                        <UIcon name="i-lucide-coins" class="w-6 h-6 text-purple-500 dark:text-purple-400" />
                     </div>
                     <div class="mt-2">
                         <div class="text-2xl font-bold text-gray-900 dark:text-white leading-tight">
                             {{ formatCurrency(totalSubscription) }}
                         </div>
-                    </div>
-                    <div class="mt-2 flex flex-col">
-                        <span class="text-[11px] text-gray-500 dark:text-gray-400">
-                            Pertumbuhan: {{ subscriptionGrowth.isUp ? '+' : '' }} {{ formatCurrency(subscriptionGrowth.diff) }}
-                        </span>
-                        <span class="text-[11px] text-gray-400 dark:text-gray-500">
-                            Bulan lalu: {{ formatCurrency(prevSubscription) }}
-                        </span>
                     </div>
                 </UCard>
 
@@ -96,26 +60,14 @@
                 <UCard>
                     <div class="flex items-center justify-between">
                         <span class="text-sm font-semibold text-gray-500 dark:text-gray-400 flex items-center gap-2">
-                            <UIcon name="i-lucide-user-x" class="w-5 h-5 text-red-500 dark:text-red-400" />
-                            Active Churns
+                            Customer Churns
                         </span>
-                        <UBadge :color="churnGrowth.diff <= 0 ? 'success' : 'error'" variant="subtle" size="sm" class="flex items-center gap-0.5 font-bold">
-                            <UIcon :name="churnGrowth.diff > 0 ? 'i-lucide-trending-up' : 'i-lucide-trending-down'" class="w-3.5 h-3.5" />
-                            {{ churnGrowth.diff > 0 ? '+' : '' }}{{ churnGrowth.diff }}
-                        </UBadge>
+                        <UIcon name="i-lucide-user-x" class="w-6 h-6 text-red-500 dark:text-red-400" />
                     </div>
                     <div class="mt-2">
                         <div class="text-2xl font-bold text-gray-900 dark:text-white leading-tight">
                             {{ churnCount }}
                         </div>
-                    </div>
-                    <div class="mt-2 flex flex-col">
-                        <span class="text-[11px] text-gray-500 dark:text-gray-400">
-                            Perubahan: {{ churnGrowth.diff > 0 ? '+' : '' }}{{ churnGrowth.diff }}
-                        </span>
-                        <span class="text-[11px] text-gray-400 dark:text-gray-500">
-                            Bulan lalu: {{ prevChurnCount }}
-                        </span>
                     </div>
                 </UCard>
             </div>
@@ -370,11 +322,6 @@ const totalMrc = ref(0)
 const totalSubscription = ref(0)
 const churnCount = ref(0)
 
-const prevCommission = ref(0)
-const prevMrc = ref(0)
-const prevSubscription = ref(0)
-const prevChurnCount = ref(0)
-
 const formatCurrency = (value: number): string => {
     return new Intl.NumberFormat('id-ID', { 
         style: 'currency', 
@@ -383,44 +330,6 @@ const formatCurrency = (value: number): string => {
         maximumFractionDigits: 0 
     }).format(value)
 }
-
-const commissionGrowth = computed(() => {
-    const diff = totalCommission.value - prevCommission.value
-    const percent = prevCommission.value > 0 ? (diff / prevCommission.value) * 100 : 0
-    return {
-        diff,
-        percent: Math.round(percent * 10) / 10,
-        isUp: diff >= 0
-    }
-})
-
-const mrcGrowth = computed(() => {
-    const diff = totalMrc.value - prevMrc.value
-    const percent = prevMrc.value > 0 ? (diff / prevMrc.value) * 100 : 0
-    return {
-        diff,
-        percent: Math.round(percent * 10) / 10,
-        isUp: diff >= 0
-    }
-})
-
-const subscriptionGrowth = computed(() => {
-    const diff = totalSubscription.value - prevSubscription.value
-    const percent = prevSubscription.value > 0 ? (diff / prevSubscription.value) * 100 : 0
-    return {
-        diff,
-        percent: Math.round(percent * 10) / 10,
-        isUp: diff >= 0
-    }
-})
-
-const churnGrowth = computed(() => {
-    const diff = churnCount.value - prevChurnCount.value
-    return {
-        diff,
-        isUp: diff > 0
-    }
-})
 
 const fetchData = async () => {
     const additionalService = new AdditionalService()
@@ -451,34 +360,6 @@ const fetchInvoiceData = async () => {
     totalMrc.value = response.data.totalMrc || 0
     totalSubscription.value = response.data.totalSubscription || 0
     churnCount.value = response.data.churnCount || 0
-
-    // Fetch previous period data for dynamic calculations
-    const prevMonthVal = month.value === 1 ? 12 : month.value - 1
-    const prevYearVal = month.value === 1 ? year.value - 1 : year.value
-
-    try {
-        const prevResponse = await invoiceService.getInvoiceImplementator(route.params.id as string, {
-            month: prevMonthVal,
-            year: prevYearVal
-        })
-        if (prevResponse?.data) {
-            prevCommission.value = prevResponse.data.totalCommission || 0
-            prevMrc.value = prevResponse.data.totalMrc || 0
-            prevSubscription.value = prevResponse.data.totalSubscription || 0
-            prevChurnCount.value = prevResponse.data.churnCount || 0
-        } else {
-            prevCommission.value = 0
-            prevMrc.value = 0
-            prevSubscription.value = 0
-            prevChurnCount.value = 0
-        }
-    } catch (e) {
-        console.error("Failed to fetch previous month data:", e)
-        prevCommission.value = 0
-        prevMrc.value = 0
-        prevSubscription.value = 0
-        prevChurnCount.value = 0
-    }
 }
 
 watch([year, month], () => {
