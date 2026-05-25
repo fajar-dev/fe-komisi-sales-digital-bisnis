@@ -1,70 +1,46 @@
-export interface ImplementatorMouthlyQueryParams {
-    year: number;
-}
-
-export interface ImplementatorMonthlyDetail {
-    name: string;
-    count: number;
-    total: number;
-}
-
-export interface ImplementatorMonthlyData {
-    month: string;
-    detail: ImplementatorMonthlyDetail[];
-    total: number;
-}
-
-export interface ImplementatorMouthlyResponseData {
-    success: boolean;
-    message: string;
-    data: {
-        total: number;
-        data: ImplementatorMonthlyData[];
-    };
-}
 
 export interface InvoiceImplementatorResponseData {
     success: boolean;
+    statusCode: number;
     message: string;
     data: {
-        data: InvoiceImplementatorData[];
-        total: number;
+        invoice: InvoiceImplementatorData[];
+        churnCount: number;
+        totalSubscription: number;
+        totalMrc: number;
+        totalCommission: number;
     };
 }
 
 export interface ImplementatorInvoiceQueryParams {
-    startDate: string;
-    endDate: string;
+    month: number;
+    year: number;
 }
 
 export interface InvoiceImplementatorData {
     ai: number;
     invoiceNumber: number;
-    position: number;
-    invoiceDate: string;
+    sequenceNumber: number;
     paidDate: string;
-    monthPeriod: number;
-    dpp: number;
-    sales: sales;
-    customerServiceId: number;
+    status: string;
+    monthPeriod: string;
+    totalAccount: number;
     customerId: string;
+    customerServiceId: number;
     customerCompany: string;
-    customerGroupId: string;
+    contractUntilDate: string;
+    serviceGroupId: string;
     serviceId: string;
     serviceName: string;
-    salesId: string;
-    managerSalesId: string;
-    implementatorId: string;
-    referralId: string;
-    isNew: boolean;
-    isUpgrade: boolean;
-    isTermin: boolean;
-    implementatorCommission: number;
-    implementatorCommissionPercentage: number;
-}
-
-export interface sales {
-    name: string;
-    id: string;
-    photo: string;
+    serviceType: string;
+    crossSellCount: number;
+    salesId: {
+        name: string;
+        employeeId: string;
+        photoProfile: string;
+    };
+    subscription: number;
+    mrc: number;
+    commissionPercentage: number;
+    commission: number;
 }
