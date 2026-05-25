@@ -17,26 +17,6 @@
                             Customer Invoice
                             </p>
                         </div>
-                        <UPopover>
-                            <UButton color="neutral" variant="subtle" icon="i-lucide-calendar">
-                            <template v-if="modelValue.start">
-                                <template v-if="modelValue.end">
-                                {{ df.format(modelValue.start.toDate(getLocalTimeZone())) }} - {{ df.format(modelValue.end.toDate(getLocalTimeZone())) }}
-                                </template>
-
-                                <template v-else>
-                                {{ df.format(modelValue.start.toDate(getLocalTimeZone())) }}
-                                </template>
-                            </template>
-                            <template v-else>
-                                Pick a date
-                            </template>
-                            </UButton>
-
-                            <template #content>
-                            <UCalendar v-model="modelValue" class="p-2" :number-of-months="2" range />
-                            </template>
-                        </UPopover>
                     </div>
                 </template>
                     <div class="px-4 pb-4">
@@ -57,11 +37,7 @@ import { EmployeeService } from '~/services/employee-service'
 import { InvoiceService } from '~/services/invoice-service'
 import type { Employee } from '~/types/employee'
 
-import { CalendarDate, DateFormatter, getLocalTimeZone } from '@internationalized/date'
-
-const df = new DateFormatter('en-US', {
-  dateStyle: 'medium'
-})
+import { CalendarDate } from '@internationalized/date'
 
 const modelValue = shallowRef({
     start: new CalendarDate(2026, 1, 1),
@@ -389,10 +365,6 @@ const initPage = async () => {
     
     await fetchInvoiceData()
 }
-
-watch(modelValue, () => {
-    fetchInvoiceData()
-})
 
 initPage()
 </script>
