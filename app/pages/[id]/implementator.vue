@@ -176,7 +176,7 @@ const columns: TableColumn<InvoiceImplementatorData>[] = [
     {
         header: 'Sales',
         cell: ({ row }) => {
-            const sales = row.original.salesId
+            const sales = row.original.sales
             if (!sales || !sales.employeeId) {
                 return '-'
             }

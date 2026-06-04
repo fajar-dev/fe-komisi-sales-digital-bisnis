@@ -28,7 +28,7 @@ export interface InvoiceImplementatorData {
     serviceName: string;
     serviceType: string;
     crossSellCount: number;
-    salesId: {
+    sales: {
         name: string;
         employeeId: string;
         photoProfile: string;

@@ -1,63 +1,39 @@
+export interface InvoiceSalesInternalResponseData {
+    success: boolean;
+    statusCode: number;
+    message: string;
+    data: InvoiceSalesInternalData[]
+}
 
 export interface SalesInvoiceQueryParams {
-    startDate: string;
-    endDate: string;
+    month: number;
+    year: number;
 }
 
-export interface InvoiceSalesResponseData {
-    success: boolean;
-    message: string;
-    data: {
-        data: InvoiceSalesData[];
-        totalCommission: number;
-        totalDpp: number;
-    };
-}
-
-export interface InvoiceSalesShowResponseData {
-    success: boolean;
-    message: string;
-    data: InvoiceSalesData;
-}
-
-export interface InvoiceSalesData {
+export interface InvoiceSalesInternalData {
     ai: number;
-    counter: number;
     invoiceNumber: number;
-    position: number;
-    invoiceDate: string;
-    dpp: number;
-    implementator: implementator;
-    newSub:number
+    sequenceNumber: number;
     paidDate: string;
-    monthPeriod: number;
-    customerServiceId: number;
+    status: string;
+    monthPeriod: string;
+    totalAccount: number;
     customerId: string;
+    customerServiceId: number;
     customerCompany: string;
-    customerGroupId: string;
+    contractUntilDate: string;
+    serviceGroupId: string;
     serviceId: string;
     serviceName: string;
-    salesId: string;
-    managerSalesId: string;
-    implementatorId: string;
-    referralId: string;
-    isNew: boolean;
-    isUpgrade: boolean;
-    isTermin: boolean;
-    salesCommission: number;
-    type:string
-    salesCommissionPercentage: number;
-    modal: string | null;
-    price: string | null;
-    margin: string | null;
-    markup: string | null;
-    mrc: number | string | null;
+    serviceType: string;
+    crossSellCount: number;
+    implementator: {
+        name: string;
+        employeeId: string;
+        photoProfile: string;
+    };
+    subscription: number;
+    mrc: number;
+    commissionPercentage: number;
+    commission: number;
 }
-
-export interface implementator {
-    name: string;
-    id: string;
-    photo: string;
-}
-
-
