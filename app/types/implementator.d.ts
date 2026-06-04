@@ -3,13 +3,7 @@ export interface InvoiceImplementatorResponseData {
     success: boolean;
     statusCode: number;
     message: string;
-    data: {
-        invoice: InvoiceImplementatorData[];
-        churnCount: number;
-        totalSubscription: number;
-        totalMrc: number;
-        totalCommission: number;
-    };
+    data: InvoiceImplementatorData[]
 }
 
 export interface ImplementatorInvoiceQueryParams {
@@ -43,4 +37,22 @@ export interface InvoiceImplementatorData {
     mrc: number;
     commissionPercentage: number;
     commission: number;
+}
+
+export interface ImplementatorCommissionResponseData {
+    success: boolean;
+    statusCode: number;
+    message: string;
+    data: ImplementatorCommissionData;
+}
+
+export interface ImplementatorCommissionData {
+    commission: {
+        new: number;
+        recurring: number;
+        total: number;
+    };
+    mrc: number;
+    subscription: number;
+    churnCount: number;
 }
