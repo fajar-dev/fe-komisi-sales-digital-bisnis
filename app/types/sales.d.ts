@@ -37,3 +37,20 @@ export interface InvoiceSalesInternalData {
     commissionPercentage: number;
     commission: number;
 }
+
+export interface SalesCommissionResponseData {
+    success: boolean;
+    statusCode: number;
+    message: string;
+    data: SalesCommissionData;
+}
+
+export interface SalesCommissionData {
+    commission: {
+        new: number;
+        recurring: number;
+        total: number;
+    };
+    mrc: number;
+    subscription: number;
+}

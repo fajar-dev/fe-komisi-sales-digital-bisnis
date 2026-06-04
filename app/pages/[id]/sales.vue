@@ -8,6 +8,55 @@
             subtitle="Monthly sales commission heatmap 🔥"
         />
 
+        <div class="py-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <!-- Commission Card -->
+                <UCard>
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm font-semibold text-gray-500 dark:text-gray-400 flex items-center gap-2">
+                            Total Commission
+                        </span>
+                        <UIcon name="i-lucide-wallet" class="w-6 h-6 text-info dark:text-blue-400" />
+                    </div>
+                    <div class="mt-2">
+                        <div class="text-2xl font-bold text-gray-900 dark:text-white leading-tight">
+                            {{ formatCurrency(commissionData?.commission?.total || 0) }}
+                        </div>
+                    </div>
+                </UCard>
+
+                <!-- MRC Card -->
+                <UCard>
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm font-semibold text-gray-500 dark:text-gray-400 flex items-center gap-2">
+                            Total MRC
+                        </span>
+                        <UIcon name="i-lucide-trending-up" class="w-6 h-6 text-emerald-500 dark:text-emerald-400" />
+                    </div>
+                    <div class="mt-2">
+                        <div class="text-2xl font-bold text-gray-900 dark:text-white leading-tight">
+                            {{ formatCurrency(commissionData?.mrc || 0) }}
+                        </div>
+                    </div>
+                </UCard>
+
+                <!-- Subscription Card -->
+                <UCard>
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm font-semibold text-gray-500 dark:text-gray-400 flex items-center gap-2">
+                            Total Subscription
+                        </span>
+                        <UIcon name="i-lucide-coins" class="w-6 h-6 text-purple-500 dark:text-purple-400" />
+                    </div>
+                    <div class="mt-2">
+                        <div class="text-2xl font-bold text-gray-900 dark:text-white leading-tight">
+                            {{ formatCurrency(commissionData?.subscription || 0) }}
+                        </div>
+                    </div>
+                </UCard>
+            </div>
+        </div>
+
         <div class="py-2 mt-4">
             <div class="grid grid-cols-1">
                 <UCard>
@@ -22,16 +71,18 @@
 import { AdditionalService } from '~/services/additional-service'
 import { EmployeeService } from '~/services/employee-service'
 import { InvoiceService } from '~/services/invoice-service'
+import { CommissionService } from '~/services/commission-service'
 import type { Employee } from '~/types/employee'
 import { h, resolveComponent } from 'vue'
 import type { TableColumn } from '@nuxt/ui'
-import type { InvoiceSalesInternalData } from '~/types/sales'
+import type { InvoiceSalesInternalData, SalesCommissionData } from '~/types/sales'
 
 const UBadge = resolveComponent('UBadge')
 const UAvatar = resolveComponent('UAvatar')
 const ClientOnly = resolveComponent('ClientOnly')
 
 const invoiceData = ref<InvoiceSalesInternalData[]>([])
+const commissionData = ref<SalesCommissionData>()
 
 const columns: TableColumn<InvoiceSalesInternalData>[] = [
     {
@@ -238,6 +289,12 @@ const fetchInvoiceData = async () => {
     const invoiceService = new InvoiceService()
     const response = await invoiceService.getInvoiceInternal(route.params.id as string, {month: month.value, year: year.value})
     invoiceData.value = response.data
+
+    const commissionService = new CommissionService()
+    const commissionResponse = await commissionService.salesCommission(route.params.id as string, {month: month.value, year: year.value})
+    if (commissionResponse?.data) {
+        commissionData.value = commissionResponse.data
+    }
 }
 
 watch([year, month], () => {
