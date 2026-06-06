@@ -1,13 +1,13 @@
+export interface SalesInvoiceQueryParams {
+    month: number;
+    year: number;
+}
+
 export interface InvoiceSalesInternalResponseData {
     success: boolean;
     statusCode: number;
     message: string;
     data: InvoiceSalesInternalData[]
-}
-
-export interface SalesInvoiceQueryParams {
-    month: number;
-    year: number;
 }
 
 export interface InvoiceSalesInternalData {
@@ -34,6 +34,40 @@ export interface InvoiceSalesInternalData {
     };
     subscription: number;
     mrc: number;
+    commissionPercentage: number;
+    commission: number;
+}
+
+export interface InvoiceSalesResellResponseData {
+    success: boolean;
+    statusCode: number;
+    message: string;
+    data: InvoiceSalesResellData[]
+}
+
+export interface InvoiceSalesResellData {
+    ai: number;
+    invoiceNumber: number;
+    sequenceNumber: number;
+    paidDate: string;
+    status: string;
+    monthPeriod: string;
+    totalAccount: number;
+    customerId: string;
+    customerServiceId: number;
+    customerCompany: string;
+    contractUntilDate: string;
+    serviceGroupId: string;
+    serviceId: string;
+    serviceName: string;
+    serviceType: string;
+    crossSellCount: number;
+    subscription: number;
+    mrc: number;
+    modal: number;
+    price: number;
+    markup: number;
+    margin: number;
     commissionPercentage: number;
     commission: number;
 }
