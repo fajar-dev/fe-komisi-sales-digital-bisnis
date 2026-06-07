@@ -88,33 +88,35 @@
         </div>
 
         <div class="py-2 mt-4">
-            <UTabs :items="tabItems" v-model="activeTab">
-                <template #internal>
-                    <div class="grid grid-cols-1 mt-4">
-                        <UCard>
-                            <UTable sticky :data="invoiceData" :columns="columns" class="flex-1 max-h-[800px]" />
-                        </UCard>
-                    </div>
+            <UCard>
+                <template #header>
+                    <h3 class="text-lg font-semibold">Invoice</h3>
+                    <p class="text-sm text-gray-500">Monthly invoice details</p>
                 </template>
-                <template #resell>
-                    <div class="grid grid-cols-1 mt-4">
-                        <UAlert
-                            v-if="resellWarningCount > 0"
-                            color="warning"
-                            variant="soft"
-                            icon="i-lucide-triangle-alert"
-                            title="Perhatian"
-                            :description="`${resellWarningCount} invoice tidak memiliki modal (Rp.0). Komisi dihitung dengan default margin 2.5%.`"
-                            class="mb-4"
-                        />
-                        <UCard>
+                <UTabs :items="tabItems" v-model="activeTab">
+                    <template #internal>
+                        <div class="mt-4">
+                            <UTable sticky :data="invoiceData" :columns="columns" class="flex-1 max-h-[800px]" />
+                        </div>
+                    </template>
+                    <template #resell>
+                        <div class="mt-4">
+                            <UAlert
+                                v-if="resellWarningCount > 0"
+                                color="warning"
+                                variant="soft"
+                                icon="i-lucide-triangle-alert"
+                                title="Perhatian"
+                                :description="`${resellWarningCount} invoice tidak memiliki modal (Rp.0). Komisi dihitung dengan default margin terkecil (2.5%).`"
+                                class="mb-4"
+                            />
                             <div class="resell-table">
                                 <UTable sticky :data="resellData" :columns="resellColumns" class="flex-1 max-h-[800px]" />
                             </div>
-                        </UCard>
-                    </div>
-                </template>
-            </UTabs>
+                        </div>
+                    </template>
+                </UTabs>
+            </UCard>
         </div>
     </UContainer>
 </template>
@@ -293,7 +295,9 @@ const columns: TableColumn<InvoiceSalesInternalData>[] = [
         },
         cell: ({ row }) => {
             const period = parseFloat(row.original.monthPeriod)
-            return isNaN(period) ? '-' : Math.round(period)
+            if (isNaN(period)) return '-'
+            const truncated = Math.trunc(period * 100) / 100
+            return parseFloat(truncated.toFixed(2))
         }
     },
     {
@@ -529,7 +533,9 @@ const resellColumns: TableColumn<InvoiceSalesResellData>[] = [
         },
         cell: ({ row }) => {
             const period = parseFloat(row.original.monthPeriod)
-            return isNaN(period) ? '-' : Math.round(period)
+            if (isNaN(period)) return '-'
+            const truncated = Math.trunc(period * 100) / 100
+            return parseFloat(truncated.toFixed(2))
         }
     },
     {
