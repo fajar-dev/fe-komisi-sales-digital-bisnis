@@ -11,49 +11,79 @@
         <div class="py-4">
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 <!-- Commission Card -->
-                <UCard>
-                    <div class="flex items-center justify-between">
-                        <span class="text-sm font-semibold text-gray-500 dark:text-gray-400 flex items-center gap-2">
-                            Total Commission
-                        </span>
-                        <UIcon name="i-lucide-wallet" class="w-6 h-6 text-info dark:text-blue-400" />
-                    </div>
-                    <div class="mt-2">
-                        <div class="text-2xl font-bold text-gray-900 dark:text-white leading-tight">
-                            {{ formatCurrency(commissionData?.commission?.total || 0) }}
+                <MetricCard
+                    label="Total Commission"
+                    icon="i-lucide-wallet"
+                    icon-color="text-info dark:text-blue-400"
+                    :data="commissionData?.commission?.total"
+                    :is-currency="true"
+                    :large="true"
+                >
+                    <div v-if="commissionData?.commission" class="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700 space-y-3">
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm text-gray-500 dark:text-gray-400">New</span>
+                            <div class="flex items-center gap-2">
+                                <span class="text-sm font-semibold text-gray-900 dark:text-white">{{ formatCurrency(commissionData.commission.new?.value || 0) }}</span>
+                                <UBadge
+                                    v-if="commissionData.commission.new"
+                                    :color="trendColor(commissionData.commission.new.trend)"
+                                    variant="soft"
+                                    size="sm"
+                                >
+                                    {{ formatPercentage(commissionData.commission.new.percentage) }}
+                                </UBadge>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm text-gray-500 dark:text-gray-400">Recurring</span>
+                            <div class="flex items-center gap-2">
+                                <span class="text-sm font-semibold text-gray-900 dark:text-white">{{ formatCurrency(commissionData.commission.recurring?.value || 0) }}</span>
+                                <UBadge
+                                    v-if="commissionData.commission.recurring"
+                                    :color="trendColor(commissionData.commission.recurring.trend)"
+                                    variant="soft"
+                                    size="sm"
+                                >
+                                    {{ formatPercentage(commissionData.commission.recurring.percentage) }}
+                                </UBadge>
+                            </div>
                         </div>
                     </div>
-                </UCard>
+                </MetricCard>
 
-                <!-- MRC Card -->
-                <UCard>
-                    <div class="flex items-center justify-between">
-                        <span class="text-sm font-semibold text-gray-500 dark:text-gray-400 flex items-center gap-2">
-                            Total MRC
-                        </span>
-                        <UIcon name="i-lucide-trending-up" class="w-6 h-6 text-emerald-500 dark:text-emerald-400" />
-                    </div>
-                    <div class="mt-2">
-                        <div class="text-2xl font-bold text-gray-900 dark:text-white leading-tight">
-                            {{ formatCurrency(commissionData?.mrc || 0) }}
-                        </div>
-                    </div>
-                </UCard>
+                <!-- New Customer & New User Stacked -->
+                <div class="flex flex-col gap-4">
+                    <MetricCard
+                        label="New Customer"
+                        icon="i-lucide-user-plus"
+                        icon-color="text-amber-500 dark:text-amber-400"
+                        :data="commissionData?.newCustomer"
+                    />
+                    <MetricCard
+                        label="New User"
+                        icon="i-lucide-users"
+                        icon-color="text-cyan-500 dark:text-cyan-400"
+                        :data="commissionData?.newUser"
+                    />
+                </div>
 
-                <!-- Subscription Card -->
-                <UCard>
-                    <div class="flex items-center justify-between">
-                        <span class="text-sm font-semibold text-gray-500 dark:text-gray-400 flex items-center gap-2">
-                            Total Subscription
-                        </span>
-                        <UIcon name="i-lucide-coins" class="w-6 h-6 text-purple-500 dark:text-purple-400" />
-                    </div>
-                    <div class="mt-2">
-                        <div class="text-2xl font-bold text-gray-900 dark:text-white leading-tight">
-                            {{ formatCurrency(commissionData?.subscription || 0) }}
-                        </div>
-                    </div>
-                </UCard>
+                <!-- MRC & Subscription Stacked -->
+                <div class="flex flex-col gap-4">
+                    <MetricCard
+                        label="Total MRC"
+                        icon="i-lucide-trending-up"
+                        icon-color="text-emerald-500 dark:text-emerald-400"
+                        :data="commissionData?.mrc"
+                        :is-currency="true"
+                    />
+                    <MetricCard
+                        label="Total Subscription"
+                        icon="i-lucide-coins"
+                        icon-color="text-purple-500 dark:text-purple-400"
+                        :data="commissionData?.subscription"
+                        :is-currency="true"
+                    />
+                </div>
             </div>
         </div>
 

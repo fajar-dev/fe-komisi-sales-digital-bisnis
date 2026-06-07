@@ -79,12 +79,21 @@ export interface SalesCommissionResponseData {
     data: SalesCommissionData;
 }
 
+export interface TrendData {
+    trend: 'up' | 'down';
+    value: number;
+    percentage: number;
+    growth: number;
+}
+
 export interface SalesCommissionData {
     commission: {
-        new: number;
-        recurring: number;
-        total: number;
+        new: TrendData;
+        recurring: TrendData;
+        total: TrendData;
     };
-    mrc: number;
-    subscription: number;
+    mrc: TrendData;
+    subscription: TrendData;
+    newCustomer: TrendData;
+    newUser: TrendData;
 }
