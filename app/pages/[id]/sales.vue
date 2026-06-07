@@ -289,15 +289,20 @@ const columns: TableColumn<InvoiceSalesInternalData>[] = [
         header: 'Month Period',
         meta: {
             class: {
-                th: 'text-center',
-                td: 'text-center font-medium'
+                th: 'text-right',
+                td: 'text-right font-medium'
             }
         },
         cell: ({ row }) => {
             const period = parseFloat(row.original.monthPeriod)
             if (isNaN(period)) return '-'
             const truncated = Math.trunc(period * 100) / 100
-            return parseFloat(truncated.toFixed(2))
+            const value = parseFloat(truncated.toFixed(2))
+            const summary = row.original.monthPeriodSummary
+            return h('div', { class: 'flex flex-col' }, [
+                h('span', { class: 'text-sm text-highlighted' }, value),
+                h('span', { class: 'text-sm' }, summary)
+            ])
         }
     },
     {
@@ -527,15 +532,20 @@ const resellColumns: TableColumn<InvoiceSalesResellData>[] = [
         header: 'Month Period',
         meta: {
             class: {
-                th: 'text-center',
-                td: 'text-center font-medium'
+                th: 'text-right',
+                td: 'text-right font-medium'
             }
         },
         cell: ({ row }) => {
             const period = parseFloat(row.original.monthPeriod)
             if (isNaN(period)) return '-'
             const truncated = Math.trunc(period * 100) / 100
-            return parseFloat(truncated.toFixed(2))
+            const value = parseFloat(truncated.toFixed(2))
+            const summary = row.original.monthPeriodSummary
+            return h('div', { class: 'flex flex-col' }, [
+                h('span', { class: 'text-sm text-highlighted' }, value),
+                h('span', { class: 'text-sm' }, summary)
+            ])
         }
     },
     {

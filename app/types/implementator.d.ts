@@ -1,4 +1,6 @@
 
+import type { TrendData } from '~/types/sales'
+
 export interface InvoiceImplementatorResponseData {
     success: boolean;
     statusCode: number;
@@ -18,6 +20,7 @@ export interface InvoiceImplementatorData {
     paidDate: string;
     status: string;
     monthPeriod: string;
+    monthPeriodSummary: string;
     totalAccount: number;
     customerId: string;
     customerServiceId: number;
@@ -48,11 +51,11 @@ export interface ImplementatorCommissionResponseData {
 
 export interface ImplementatorCommissionData {
     commission: {
-        new: number;
-        recurring: number;
-        total: number;
+        new: TrendData;
+        recurring: TrendData;
+        total: TrendData;
     };
-    mrc: number;
-    subscription: number;
-    churnCount: number;
+    mrc: TrendData;
+    subscription: TrendData;
+    churnCount: TrendData;
 }

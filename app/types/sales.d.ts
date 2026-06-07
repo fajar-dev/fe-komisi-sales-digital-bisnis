@@ -17,6 +17,7 @@ export interface InvoiceSalesInternalData {
     paidDate: string;
     status: string;
     monthPeriod: string;
+    monthPeriodSummary: string;
     totalAccount: number;
     customerId: string;
     customerServiceId: number;
@@ -52,6 +53,7 @@ export interface InvoiceSalesResellData {
     paidDate: string;
     status: string;
     monthPeriod: string;
+    monthPeriodSummary: string;
     totalAccount: number;
     customerId: string;
     customerServiceId: number;
