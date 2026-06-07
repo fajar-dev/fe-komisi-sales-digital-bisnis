@@ -52,13 +52,21 @@
                     </div>
                 </MetricCard>
 
-                <!-- Churn Card -->
-                <MetricCard
-                    label="Customer Churns"
-                    icon="i-lucide-user-x"
-                    icon-color="text-red-500 dark:text-red-400"
-                    :data="commissionData?.churnCount"
-                />
+                <!-- Churn & New Account Stacked -->
+                <div class="flex flex-col gap-4">
+                    <MetricCard
+                        label="Customer Churns"
+                        icon="i-lucide-user-x"
+                        icon-color="text-red-500 dark:text-red-400"
+                        :data="commissionData?.churnCount"
+                    />
+                    <MetricCard
+                        label="New Account"
+                        icon="i-lucide-users"
+                        icon-color="text-cyan-500 dark:text-cyan-400"
+                        :data="commissionData?.newAccount"
+                    />
+                </div>
 
                 <!-- MRC & Subscription Stacked -->
                 <div class="flex flex-col gap-4">

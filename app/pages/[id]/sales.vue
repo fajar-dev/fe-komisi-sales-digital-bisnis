@@ -60,10 +60,10 @@
                         :data="commissionData?.newCustomer"
                     />
                     <MetricCard
-                        label="New User"
+                        label="New Account"
                         icon="i-lucide-users"
                         icon-color="text-cyan-500 dark:text-cyan-400"
-                        :data="commissionData?.newUser"
+                        :data="commissionData?.newAccount"
                     />
                 </div>
 

@@ -97,5 +97,5 @@ export interface SalesCommissionData {
     mrc: TrendData;
     subscription: TrendData;
     newCustomer: TrendData;
-    newUser: TrendData;
+    newAccount: TrendData;
 }
