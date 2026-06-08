@@ -1,26 +1,25 @@
-export interface TeamQueryParams {
+export interface ManagerTeamQueryParams {
+    month: number;
     year: number;
 }
 
-export interface TeamResponseData {
+export interface ManagerTeamResponseData {
     success: boolean;
+    statusCode: number;
     message: string;
-    data: {
-        data: ManagerTeamData[];
-        total: number;
-    };
+    data: ManagerTeamMemberData[];
 }
 
-export interface ManagerTeamData {
-    id: number
-    employee_id: string
-    name: string
-    email: string
-    photo_profile: string
-    job_position: string
-    organization_name: string
-    job_level: string
-    branch: string
-    manager_id: number
-    totalCommission: number
+export interface ManagerTeamMemberData {
+    employeeId: string;
+    name: string;
+    photoProfile: string;
+    detail: {
+        commission: number;
+        mrc: number;
+        subscription: number;
+        newCustomer: number;
+        newAccount: number;
+    };
+    managerCommission: number;
 }

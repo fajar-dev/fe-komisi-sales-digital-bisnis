@@ -4,492 +4,208 @@
         <CommissionHeader
             :employee="employee"
             v-model:year="year"
-            :year-items="items"
+            v-model:month="month"
             subtitle="Monthly manager commission heatmap 🔥"
         />
 
-        <div class="py-2">
-        <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-            <UPageCard
-                v-for="card in monthcard"
-                :key="card.mounth"
-                :title="String(card.total)"
-                :description="card.mounth"
-            >
-            </UPageCard>
-        </div>
-        </div>
-
-        <div class="py-2">
-        <div class="grid grid-cols-1 md:grid-cols-1 gap-4">
+        <div class="py-2 mt-4">
             <UCard>
-            <template #header>
-                <div class="lg:flex items-center justify-between">
-                    <div>
-                        <h2>Monthly Commission</h2>
-                        <p class="text-sm text-gray-500 dark:text-gray-400">
-                            Total monthly commission
-                        </p>
-                    </div>
-                    <div>
-                        <h1 class="font-bold text-2xl">Total: {{ new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(totalCommissionData.reduce((total, item) => total + item.total, 0)) }}</h1>
-                    </div>
-                </div>
-            </template>
-                 <LineChart
-                    :data="totalCommissionData"
-                    :height="280"
-                    y-label="Total Commission"
-                    :x-num-ticks="4"
-                    :y-num-ticks="4"
-                    :categories="totalCommissionChart"
-                    :x-formatter="xFormatterTotalCommission"
-                    :y-formatter="yFormatterCommission"
-                    :y-grid-line="true"
-                    :curve-type="CurveType.MonotoneX"
-                    :legend-position="LegendPosition.TopRight"
-                    :hide-legend="false"
-                />
+                <template #header>
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Team</h3>
+                </template>
+                <UTable sticky :data="teamData" :columns="teamColumns" class="flex-1 max-h-[800px]" @select="onSelectTeamMember" :ui="{ tr: 'cursor-pointer' }" />
             </UCard>
-        </div>
-        </div>
-
-        <div class="py-2">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <UCard>
-                    <template #header>
-                        <div class="space-y-3">
-                            <div>
-                                <h2>MRC</h2>
-                                <p class="text-sm text-gray-500 dark:text-gray-400">
-                                    Monthly Recurring Charge
-                                </p>
-                            </div>
-                            <!-- Custom Legend -->
-                            <div class="flex flex-wrap gap-x-4 gap-y-2">
-                                <div 
-                                    v-for="(item, key) in mrcChart" 
-                                    :key="key"
-                                    class="flex items-center gap-1.5"
-                                >
-                                    <div 
-                                        :style="`background-color: ${item.color}`"
-                                        class="w-3 h-3 rounded-sm flex-shrink-0"
-                                    />
-                                    <span class="text-xs text-gray-700 dark:text-gray-300">{{ item.name }}</span>
-                                </div>
-                            </div>
-                        </div>
-                    </template>
-                    <LineChart
-                        v-if="mrcData.length > 0"
-                        :data="mrcData"
-                        :height="280"
-                        :categories="mrcChart"
-                        :x-formatter="xFormatterCommission"
-                        :y-formatter="yFormatterCommission"
-                        :curve-type="CurveType.MonotoneX"
-                        :hide-legend="true"
-                        :y-grid-line="true"
-                    />
-                </UCard>
-                
-                <UCard>
-                    <template #header>
-                        <div class="space-y-3">
-                            <div>
-                                <h2>Subscription</h2>
-                                <p class="text-sm text-gray-500 dark:text-gray-400">
-                                    Subscription Total
-                                </p>
-                            </div>
-                            <!-- Custom Legend -->
-                            <div class="flex flex-wrap gap-x-4 gap-y-2">
-                                <div 
-                                    v-for="(item, key) in subscriptionChart" 
-                                    :key="key"
-                                    class="flex items-center gap-1.5"
-                                >
-                                    <div 
-                                        :style="`background-color: ${item.color}`"
-                                        class="w-3 h-3 rounded-sm flex-shrink-0"
-                                    />
-                                    <span class="text-xs text-gray-700 dark:text-gray-300">{{ item.name }}</span>
-                                </div>
-                            </div>
-                        </div>
-                    </template>
-                    <LineChart
-                        v-if="subscriptionData.length > 0"
-                        :data="subscriptionData"
-                        :height="280"
-                        :categories="subscriptionChart"
-                        :x-formatter="xFormatterCommission"
-                        :y-formatter="yFormatterCommission"
-                        :curve-type="CurveType.MonotoneX"
-                        :hide-legend="true"
-                        :y-grid-line="true"
-                    />
-                </UCard>
-            </div>
-        </div>
-
-        <div class="py-2">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <UCard>
-                <template #header>
-                    <div class="space-y-3">
-                        <div>
-                            <h2>Commission</h2>
-                            <p class="text-sm text-gray-500 dark:text-gray-400">
-                                Sales Commission
-                            </p>
-                        </div>
-                        <!-- Custom Legend -->
-                        <div class="flex flex-wrap gap-x-4 gap-y-2">
-                            <div 
-                                v-for="(item, key) in commissionChart" 
-                                :key="key"
-                                class="flex items-center gap-1.5"
-                            >
-                                <div 
-                                    :style="`background-color: ${item.color}`"
-                                    class="w-3 h-3 rounded-sm flex-shrink-0"
-                                />
-                                <span class="text-xs text-gray-700 dark:text-gray-300">{{ item.name }}</span>
-                            </div>
-                        </div>
-                    </div>
-                </template>
-                    <AreaChart
-                        v-if="Object.keys(commissionChart).length > 0"
-                        :key="colorMode.value"
-                        :data="commissionData"
-                        :height="280"
-                        :categories="commissionChart"
-                        :stacked="true"
-                        :x-formatter="xFormatterCommission"
-                        :y-formatter="yFormatterCommission"
-                        :curve-type="CurveType.MonotoneX"
-                        :hide-legend="true"
-                        :y-grid-line="true"
-                        :x-grid-line="false"
-                    />
-                </UCard>
-                
-                <UCard>
-                <template #header>
-                    <div class="space-y-3">
-                        <div>
-                            <h2>Customer</h2>
-                            <p class="text-sm text-gray-500 dark:text-gray-400">
-                                Customer Count
-                            </p>
-                        </div>
-                        <!-- Custom Legend -->
-                        <div class="flex flex-wrap gap-x-4 gap-y-2">
-                            <div 
-                                v-for="(item, key) in customerChart" 
-                                :key="key"
-                                class="flex items-center gap-1.5"
-                            >
-                                <div 
-                                    :style="`background-color: ${item.color}`"
-                                    class="w-3 h-3 rounded-sm flex-shrink-0"
-                                />
-                                <span class="text-xs text-gray-700 dark:text-gray-300">{{ item.name }}</span>
-                            </div>
-                        </div>
-                    </div>
-                </template>
-                    <BarChart
-                        v-if="barChartYAxis.length > 0"
-                        :data="customerData"
-                        :height="300"
-                        :categories="customerChart"
-                        :y-axis="barChartYAxis"
-                        :group-padding="0"
-                        :bar-padding="0.2"
-                        :x-num-ticks="6"
-                        :radius="4"
-                        :x-formatter="xFormatter"
-                        :y-formatter="yFormatter"
-                        :hide-legend="true"
-                        :y-grid-line="true"
-                    />
-                </UCard>
-            </div>
-        </div>
-
-        <div class="py-2">
-            <div class="grid grid-cols-1">
-                <UCard>
-                <template #header>
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <h2>Team</h2>
-                            <p class="text-sm text-gray-500 dark:text-gray-400">
-                            Team Commission
-                            </p>
-                        </div>
-                    </div>
-                </template>
-                    <UTable :data="teamData" :columns="teamColumns" class="flex-1" @select="onSelectTeamMember" :ui="{ tr: 'cursor-pointer' }" />
-                </UCard>
-            </div>
         </div>
     </UContainer>
 </template>
 
 <script setup lang="ts">
-import { CommissionService } from '~/services/commission-service'
+import { AdditionalService } from '~/services/additional-service'
 import { EmployeeService } from '~/services/employee-service'
 import { TeamService } from '~/services/team-service'
 import type { Employee } from '~/types/employee'
-import type { ManagerTeamData } from '~/types/team'
+import type { ManagerTeamMemberData } from '~/types/team'
 import { h, resolveComponent } from 'vue'
 import type { TableColumn } from '@nuxt/ui'
 
 const UAvatar = resolveComponent('UAvatar')
+const ClientOnly = resolveComponent('ClientOnly')
 
 const route = useRoute()
 const employee = ref<Employee>()  
 
-// Year Select
+const year = ref<number>()
+const month = ref<number>()
 
-const items = ref([2026, 2027, 2028, 2029, 2030])
-const year = ref(new Date().getFullYear())
+const teamData = ref<ManagerTeamMemberData[]>([])
 
-// Commission Chart (Area Chart)
-
-const commissionData = ref<any[]>([])
-const commissionChart = ref<Record<string, BulletLegendItemInterface>>({})
-
-const colorMode = useColorMode()
-
-const xFormatterCommission = (tick: number, _i?: number, _ticks?: number[]): string => {
-    return commissionData.value[tick]?.date ?? ''
-}
-
-const yFormatterCommission = (value: number): string => {
-    return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(value)
-}
-
-// Total Commission Chart (Line Chart)
-
-const totalCommissionData = ref<{
-    date: string;
-    total: number;
-}[]>([])
-
-const totalCommissionChart: Record<string, BulletLegendItemInterface> = {
-    total: { name: 'Total Commission', color: '#10b981' },
-}
-
-const xFormatterTotalCommission = (tick: number, _i?: number, _ticks?: number[]): string => {
-  return totalCommissionData.value[tick]?.date ?? ''
-}
-
-// Customer Chart (Bar Chart)
-
-const customerData = ref<any[]>([])
-const customerChart = ref<Record<string, BulletLegendItemInterface>>({})
-const barChartYAxis = ref<string[]>([])
-
-const xFormatter = (i: number): string => customerData.value[i]?.month ?? ''
-const yFormatter = (tick: number) => tick.toString()
-
-// MRC Chart
-const mrcData = ref<any[]>([])
-const mrcChart = ref<Record<string, BulletLegendItemInterface>>({})
-
-// Subscription Chart
-const subscriptionData = ref<any[]>([])
-const subscriptionChart = ref<Record<string, BulletLegendItemInterface>>({})
-
-// Month Card
-
-const monthcard = ref<{ mounth: string; total: string }[]>([])
-
-// Team Table
-const teamData = ref<ManagerTeamData[]>([])
-
-const teamColumns: TableColumn<ManagerTeamData>[] = [
-  {
-    accessorKey: 'name',
-    header: 'Name',
-    cell: ({ row }) => {
-       return h('div', { class: 'flex items-center gap-3' }, [
-           h(UAvatar, { src: row.original.photo_profile, alt: row.original.name }),
-           h('div', { class: 'flex flex-col' }, [
-               h('span', { class: 'text-sm font-medium text-gray-900 dark:text-white' }, row.original.name),
-               h('span', { class: 'text-xs text-gray-500 dark:text-gray-400' }, row.original.employee_id)
-           ])
-       ])
-    }
-  },
-  {
-    accessorKey: 'job_position',
-    header: 'Position',
-    cell: ({ row }) => {
-        return h('div', { class: 'flex flex-col' }, [
-            h('span', { class: 'text-sm font-medium' }, row.original.job_position),
-            h('span', { class: 'text-xs text-gray-500' }, row.original.organization_name)
-        ])
-    }
-  },
-   {
-    accessorKey: 'branch',
-    header: 'Branch'
-  },
-  {
-    accessorKey: 'totalCommission',
-    header: 'Total Commission',
-     meta: {
-        class: {
-            th: 'text-right',
-            td: 'text-right font-bold'
+const teamColumns: TableColumn<ManagerTeamMemberData>[] = [
+    {
+        accessorKey: 'name',
+        header: 'Sales',
+        cell: ({ row }) => {
+            return h('div', { class: 'flex items-center gap-3' }, [
+                h(UAvatar, {
+                    src: row.original.photoProfile || undefined,
+                    size: 'lg'
+                }),
+                h('div', { class: 'flex flex-col' }, [
+                    h('span', { class: 'font-medium text-highlighted' }, row.original.name),
+                    h('span', { class: 'text-xs text-gray-500 dark:text-gray-400' }, row.original.employeeId)
+                ])
+            ])
         }
     },
-    cell: ({ row }) => {
-        return new Intl.NumberFormat('id-ID', {
-            style: 'currency',
-            currency: 'IDR',
-            minimumFractionDigits: 0
-        }).format(row.getValue('totalCommission'))
+    {
+        header: 'Commission',
+        meta: {
+            class: {
+                th: 'text-right',
+                td: 'text-right font-medium'
+            }
+        },
+        cell: ({ row }) => {
+            return formatCurrency(row.original.detail.commission)
+        },
+        footer: ({ table }) => {
+            const rows = table.getFilteredRowModel().rows
+            const total = rows.reduce((acc, row) => acc + (Number(row.original.detail.commission) || 0), 0)
+            return h(ClientOnly, null, {
+                default: () => h('div', { class: 'text-right font-bold' }, formatCurrency(total)),
+                fallback: () => h('div', { class: 'text-right font-bold' }, formatCurrency(0))
+            })
+        }
+    },
+    {
+        header: 'MRC',
+        meta: {
+            class: {
+                th: 'text-right',
+                td: 'text-right font-medium'
+            }
+        },
+        cell: ({ row }) => {
+            return formatCurrency(row.original.detail.mrc)
+        },
+        footer: ({ table }) => {
+            const rows = table.getFilteredRowModel().rows
+            const total = rows.reduce((acc, row) => acc + (Number(row.original.detail.mrc) || 0), 0)
+            return h(ClientOnly, null, {
+                default: () => h('div', { class: 'text-right font-bold' }, formatCurrency(total)),
+                fallback: () => h('div', { class: 'text-right font-bold' }, formatCurrency(0))
+            })
+        }
+    },
+    {
+        header: 'Subscription',
+        meta: {
+            class: {
+                th: 'text-right',
+                td: 'text-right font-medium'
+            }
+        },
+        cell: ({ row }) => {
+            return formatCurrency(row.original.detail.subscription)
+        },
+        footer: ({ table }) => {
+            const rows = table.getFilteredRowModel().rows
+            const total = rows.reduce((acc, row) => acc + (Number(row.original.detail.subscription) || 0), 0)
+            return h(ClientOnly, null, {
+                default: () => h('div', { class: 'text-right font-bold' }, formatCurrency(total)),
+                fallback: () => h('div', { class: 'text-right font-bold' }, formatCurrency(0))
+            })
+        }
+    },
+    {
+        header: 'New Customer',
+        meta: {
+            class: {
+                th: 'text-center',
+                td: 'text-center font-medium'
+            }
+        },
+        cell: ({ row }) => {
+            return row.original.detail.newCustomer
+        },
+        footer: ({ table }) => {
+            const rows = table.getFilteredRowModel().rows
+            const total = rows.reduce((acc, row) => acc + (Number(row.original.detail.newCustomer) || 0), 0)
+            return h(ClientOnly, null, {
+                default: () => h('div', { class: 'text-center font-bold' }, total),
+                fallback: () => h('div', { class: 'text-center font-bold' }, 0)
+            })
+        }
+    },
+    {
+        header: 'New Account',
+        meta: {
+            class: {
+                th: 'text-center',
+                td: 'text-center font-medium'
+            }
+        },
+        cell: ({ row }) => {
+            return row.original.detail.newAccount
+        },
+        footer: ({ table }) => {
+            const rows = table.getFilteredRowModel().rows
+            const total = rows.reduce((acc, row) => acc + (Number(row.original.detail.newAccount) || 0), 0)
+            return h(ClientOnly, null, {
+                default: () => h('div', { class: 'text-center font-bold' }, total),
+                fallback: () => h('div', { class: 'text-center font-bold' }, 0)
+            })
+        }
+    },
+    {
+        header: 'Manager Commission',
+        meta: {
+            class: {
+                th: 'text-right',
+                td: 'text-right'
+            }
+        },
+        cell: ({ row }) => {
+            return h('div', { class: 'flex flex-col' }, [
+                h('span', { class: 'text-sm font-bold text-highlighted' }, '25%'),
+                h('span', { class: 'text-sm font-medium text-highlighted' }, formatCurrency(row.original.managerCommission))
+            ])
+        },
+        footer: ({ table }) => {
+            const rows = table.getFilteredRowModel().rows
+            const total = rows.reduce((acc, row) => acc + (Number(row.original.managerCommission) || 0), 0)
+            return h(ClientOnly, null, {
+                default: () => h('div', { class: 'text-right font-bold' }, formatCurrency(total)),
+                fallback: () => h('div', { class: 'text-right font-bold' }, formatCurrency(0))
+            })
+        }
     }
-  }
 ]
 
 const onSelectTeamMember = (event: any, row: any) => {
     const data = row?.original || row
-    if (data?.employee_id) {
-        navigateTo(`/${data.employee_id}/sales`)
+    if (data?.employeeId) {
+        navigateTo(`/${data.employeeId}/sales`)
     }
 }
 
 const fetchData = async () => {
+    const additionalService = new AdditionalService()
+    await additionalService.getCurrentPeriod()
     const employeeService = new EmployeeService()
     const employeeData = await employeeService.getEmployee(route.params.id as string)
     employee.value = employeeData.data
-
-    const commissionService = new CommissionService()
-    const data = await commissionService.managerCommission(route.params.id as string, { year: year.value })
-    
-    monthcard.value = data.data.data.map((item) => ({
-        mounth: item.month,
-        total: new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(item.total),
-    }))
-
-    // Dynamic Chart Configuration
-    const uniqueNames = new Set<string>()
-    data.data.data.forEach(m => m.detail.forEach(d => uniqueNames.add(d.name)))
-
-    const colors = ['#3b82f6', '#22c55e', '#f97316', '#a855f7', '#ec4899', '#ef4444', '#14b8a6', '#f59e0b', '#6366f1', '#84cc16']
-    let colorIndex = 0
-    
-    const newChartConfig: Record<string, BulletLegendItemInterface> = {}
-    const yAxisKeys: string[] = []
-
-    uniqueNames.forEach(name => {
-        const key = name.toLowerCase().replace(/[^a-z0-9]/g, '_')
-        yAxisKeys.push(key)
-        newChartConfig[key] = {
-            name: name,
-            color: colors[colorIndex % colors.length]
-        }
-        colorIndex++
-    })
-
-    commissionChart.value = newChartConfig
-    customerChart.value = newChartConfig
-    mrcChart.value = newChartConfig
-    subscriptionChart.value = newChartConfig
-    barChartYAxis.value = yAxisKeys
-
-    // Generate Commission Data
-    const rawCommissionData = data.data.data.map(item => {
-        const row: any = { date: item.month, total: 0 } // Add total tracking
-        yAxisKeys.forEach(key => row[key] = 0)
-        
-        item.detail.forEach(d => {
-            const key = d.name.toLowerCase().replace(/[^a-z0-9]/g, '_')
-            if (newChartConfig[key]) { // Use config to check valid keys
-                 row[key] = d.total
-                 row.total += d.total
-            }
-        })
-        return row
-    })
-    
-    // Filter out rows with 0 total
-    commissionData.value = rawCommissionData.filter((row: any) => row.total > 0)
-
-    // Generate Total Commission Data
-    totalCommissionData.value = data.data.data.map((item) => ({
-        date: item.month,
-        total: item.total
-    })).filter(item => item.total > 0)
-
-    // Generate Customer Data
-    const rawCustomerData = data.data.data.map(item => {
-        const row: any = { month: item.month, total: 0 }
-        yAxisKeys.forEach(key => row[key] = 0)
-        
-        item.detail.forEach(d => {
-            const key = d.name.toLowerCase().replace(/[^a-z0-9]/g, '_')
-             if (newChartConfig[key]) {
-                 row[key] = d.count
-                 row.total += d.count
-            }
-        })
-        return row
-    })
-    
-    // Filter out rows with 0 total count
-    customerData.value = rawCustomerData.filter((row: any) => row.total > 0)
-
-    // Generate MRC Data
-    const rawMrcData = data.data.data.map(item => {
-        const row: any = { date: item.month, total: 0 }
-        yAxisKeys.forEach(key => row[key] = 0)
-        
-        item.detail.forEach(d => {
-            const key = d.name.toLowerCase().replace(/[^a-z0-9]/g, '_')
-            if (newChartConfig[key]) {
-                row[key] = d.mrc || 0
-                row.total += (d.mrc || 0)
-            }
-        })
-        return row
-    })
-    mrcData.value = rawMrcData.filter((row: any) => row.total > 0)
-
-    // Generate Subscription Data
-    const rawSubscriptionData = data.data.data.map(item => {
-        const row: any = { date: item.month, total: 0 }
-        yAxisKeys.forEach(key => row[key] = 0)
-        
-        item.detail.forEach(d => {
-            const key = d.name.toLowerCase().replace(/[^a-z0-9]/g, '_')
-            if (newChartConfig[key]) {
-                row[key] = d.subscription || 0
-                row.total += (d.subscription || 0)
-            }
-        })
-        return row
-    })
-    subscriptionData.value = rawSubscriptionData.filter((row: any) => row.total > 0)
-
-    const teamService = new TeamService()
-    const teamResponse = await teamService.getTeamCommission(route.params.id as string, { year: year.value })
-    teamData.value = teamResponse.data.data
 }
 
-watch(year, () => {
-    fetchData()
+const fetchTeamData = async () => {
+    if (!year.value || !month.value) return
+    const teamService = new TeamService()
+    const response = await teamService.getManagerTeam(route.params.id as string, { month: month.value, year: year.value })
+    teamData.value = response.data
+}
+
+watch([year, month], () => {
+    fetchTeamData()
 })
 
 fetchData()
-
 </script>

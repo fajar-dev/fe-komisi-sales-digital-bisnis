@@ -256,8 +256,8 @@ const columns: TableColumn<InvoiceImplementatorData>[] = [
         header: 'Month Period',
         meta: {
             class: {
-                th: 'text-center',
-                td: 'text-center font-medium'
+                th: 'text-end',
+                td: 'text-end font-medium'
             }
         },
         cell: ({ row }) => {
@@ -267,8 +267,8 @@ const columns: TableColumn<InvoiceImplementatorData>[] = [
             const value = parseFloat(truncated.toFixed(2))
             const summary = row.original.monthPeriodSummary
             return h('div', { class: 'flex flex-col' }, [
-                h('span', { class: 'text-right font-bold' }, value),
-                summary ? h('span', { class: 'text-right font-bold text-gray-400' }, summary) : null
+                h('span', { class: 'text-sm text-highlighted' }, value),
+                h('span', { class: 'text-sm' }, summary)
             ])
         }
     },

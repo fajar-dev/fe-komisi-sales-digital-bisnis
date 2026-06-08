@@ -1,11 +1,11 @@
-import type { TeamQueryParams, TeamResponseData } from "~/types/team"
+import type { ManagerTeamQueryParams, ManagerTeamResponseData } from "~/types/team"
 import { apiService } from "./api-service"
 
 
 export class TeamService {
-    async getTeamCommission(employeeId: string, params: TeamQueryParams): Promise<TeamResponseData> {
+    async getManagerTeam(managerId: string, params: ManagerTeamQueryParams): Promise<ManagerTeamResponseData> {
         try {
-            const response = await apiService.client.get(`/manager/${employeeId}/team`, {
+            const response = await apiService.client.get(`/team/${managerId}/manager`, {
                 headers: {
                     authorization: `Bearer ${useAuth().state.token}`
                 },
