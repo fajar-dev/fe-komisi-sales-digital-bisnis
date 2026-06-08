@@ -1,5 +1,10 @@
 
-import type { TrendData } from '~/types/sales'
+export interface TrendData {
+    trend: 'up' | 'down';
+    value: number;
+    percentage: number;
+    growth: number;
+}
 
 export interface InvoiceImplementatorResponseData {
     success: boolean;

@@ -1,5 +1,8 @@
-export interface ManagerMouthlyQueryParams {
-    year: number;
+export interface TrendData {
+    trend: 'up' | 'down';
+    value: number;
+    percentage: number;
+    growth: number;
 }
 
 export interface ManagerMonthlyDetail {
@@ -23,4 +26,24 @@ export interface ManagerMouthlyResponseData {
         total: number;
         data: ManagerMonthlyData[];
     };
+}
+
+export interface ManagerCommissionResponseData {
+    success: boolean;
+    statusCode: number;
+    message: string;
+    data: ManagerCommissionData;
+}
+
+export interface ManagerCommissionData {
+    managerCommission: TrendData;
+    commission: {
+        new: TrendData;
+        recurring: TrendData;
+        total: TrendData;
+    };
+    mrc: TrendData;
+    subscription: TrendData;
+    newCustomer: TrendData;
+    newAccount: TrendData;
 }
