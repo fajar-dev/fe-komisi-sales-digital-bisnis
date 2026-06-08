@@ -12,6 +12,7 @@
             <UCard>
                 <template #header>
                     <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Team</h3>
+                    <p class="text-sm text-gray-500">Monthly team performance</p>
                 </template>
                 <UTable sticky :data="teamData" :columns="teamColumns" class="flex-1 max-h-[800px]" @select="onSelectTeamMember" :ui="{ tr: 'cursor-pointer' }" />
             </UCard>
