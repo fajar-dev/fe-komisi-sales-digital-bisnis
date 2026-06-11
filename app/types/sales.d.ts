@@ -99,3 +99,22 @@ export interface SalesCommissionData {
     newCustomer: TrendData;
     newAccount: TrendData;
 }
+
+export interface SalesYearlyQueryParams {
+    year: number;
+}
+
+export interface SalesCommissionYearlyResponseData {
+    success: boolean;
+    statusCode: number;
+    message: string;
+    data: SalesCommissionYearlyData[];
+}
+
+export interface SalesCommissionYearlyData {
+    commission: number;
+    mrc: number;
+    subscription: number;
+    newCustomer: number;
+    newAccount: number;
+}

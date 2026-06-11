@@ -65,3 +65,18 @@ export interface ImplementatorCommissionData {
     churnCount: TrendData;
     newAccount: TrendData;
 }
+
+export interface ImplementatorCommissionYearlyResponseData {
+    success: boolean;
+    statusCode: number;
+    message: string;
+    data: ImplementatorCommissionYearlyData[];
+}
+
+export interface ImplementatorCommissionYearlyData {
+    commission: number;
+    mrc: number;
+    subscription: number;
+    churnCount: number;
+    newAccount: number;
+}

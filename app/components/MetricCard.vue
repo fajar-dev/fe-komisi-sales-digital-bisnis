@@ -20,7 +20,7 @@
         </div>
         <div class="mt-4">
             <div :class="[large ? 'text-3xl' : 'text-2xl', 'font-bold text-gray-900 dark:text-white leading-tight']">
-                {{ isCurrency ? formatCurrency(data?.value || 0) : (data?.value ?? 0) }}
+                {{ isCurrency ? formatCurrency(displayValue) : displayValue }}
             </div>
             <p v-if="data" class="text-sm text-gray-400 mt-2">
                 {{ formatGrowth(data.growth, isCurrency) }} from last month
@@ -33,12 +33,18 @@
 <script setup lang="ts">
 import type { TrendData } from '~/types/sales'
 
-defineProps<{
+const props = defineProps<{
     label: string
     icon: string
     iconColor: string
     data?: TrendData
+    value?: number
     isCurrency?: boolean
     large?: boolean
 }>()
+
+const displayValue = computed(() => {
+    if (props.value !== undefined) return props.value
+    return props.data?.value ?? 0
+})
 </script>

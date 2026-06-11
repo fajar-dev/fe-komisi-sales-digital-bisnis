@@ -5,6 +5,7 @@
             :employee="employee"
             v-model:year="year"
             v-model:month="month"
+            mode="monthly"
             subtitle="Monthly sales commission heatmap 🔥"
         />
 
@@ -93,7 +94,7 @@
                     <h3 class="text-lg font-semibold">Invoice</h3>
                     <p class="text-sm text-gray-500">Monthly invoice details</p>
                 </template>
-                <UTabs :items="tabItems" v-model="activeTab">
+                <UTabs :items="tabItems" v-model="activeTab" variant="link" :ui="{ trigger: 'grow' }" class="gap-4 w-full">
                     <template #internal>
                         <div class="mt-4">
                             <UTable sticky :data="invoiceData" :columns="columns" class="flex-1 max-h-[800px]" />

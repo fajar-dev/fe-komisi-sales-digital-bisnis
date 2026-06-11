@@ -5,6 +5,8 @@
             :employee="employee"
             v-model:year="year"
             v-model:month="month"
+            mode="monthly"
+            route-prefix="implementator"
             subtitle="Monthly implementator commission heatmap 🔥"
         />
 

@@ -47,3 +47,19 @@ export interface ManagerCommissionData {
     newCustomer: TrendData;
     newAccount: TrendData;
 }
+
+export interface ManagerCommissionYearlyResponseData {
+    success: boolean;
+    statusCode: number;
+    message: string;
+    data: ManagerCommissionYearlyData[];
+}
+
+export interface ManagerCommissionYearlyData {
+    managerCommission: number;
+    commission: number;
+    mrc: number;
+    subscription: number;
+    newCustomer: number;
+    newAccount: number;
+}

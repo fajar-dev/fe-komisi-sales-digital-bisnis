@@ -23,3 +23,26 @@ export interface ManagerTeamMemberData {
     };
     managerCommission: number;
 }
+
+export interface ManagerTeamYearlyResponseData {
+    success: boolean;
+    statusCode: number;
+    message: string;
+    data: ManagerTeamYearlyMemberData[];
+}
+
+export interface ManagerTeamYearlyMemberData {
+    employeeId: string;
+    name: string;
+    photoProfile: string;
+    monthly: ManagerTeamYearlyMonthData[];
+}
+
+export interface ManagerTeamYearlyMonthData {
+    commission: number;
+    mrc: number;
+    subscription: number;
+    newCustomer: number;
+    newAccount: number;
+    managerCommission: number;
+}

@@ -21,9 +21,11 @@
                     </div>
                 </div>
             </div>
-            <div class="flex items-center gap-2">
-                <USelectMenu v-if="monthItems && monthItems.length" v-model="selectedMonthObject" :items="monthItems" option-attribute="label" class="w-44" />
+            <div class="flex items-center  gap-3">
+                <USelectMenu v-if="mode === 'monthly' && monthItems && monthItems.length" v-model="selectedMonthObject" :items="monthItems" option-attribute="label" class="w-44" />
                 <USelectMenu v-if="props.yearItems && props.yearItems.length" v-model="selectedYear" :items="props.yearItems" class="w-32" />
+                <div class="h-6 w-px bg-gray-200 dark:bg-gray-700" />
+                <UTabs :items="viewTabItems" v-model="activeViewTab" size="md" />
             </div>
         </div>
     </div>
@@ -37,12 +39,35 @@ const props = withDefaults(defineProps<{
     employee: Employee | undefined
     subtitle: string
     yearItems?: number[]
+    mode?: 'monthly' | 'yearly'
+    routePrefix?: string
 }>(), {
-    yearItems: () => [2026, 2027, 2028, 2029, 2030]
+    yearItems: () => [2026, 2027, 2028, 2029, 2030],
+    mode: 'monthly',
+    routePrefix: 'sales'
 })
 
 const selectedYear = defineModel<number>('year')
 const selectedMonth = defineModel<number>('month')
+
+const route = useRoute()
+const router = useRouter()
+
+const viewTabItems = [
+    { label: 'Monthly', value: 'monthly' },
+    { label: 'Yearly', value: 'yearly' }
+]
+
+const activeViewTab = ref(props.mode)
+
+watch(activeViewTab, (tab) => {
+    const id = route.params.id as string
+    if (tab === 'yearly') {
+        router.push(`/${id}/${props.routePrefix}/yearly`)
+    } else {
+        router.push(`/${id}/${props.routePrefix}`)
+    }
+})
 
 const monthItems = [
     { label: 'January', value: 1 },
@@ -84,8 +109,6 @@ const fetchDefaultPeriod = async () => {
 onMounted(() => {
     fetchDefaultPeriod()
 })
-
-const router = useRouter()
 
 const goBack = () => {
     if (window.history.length > 1 && window.history.state?.back) {
