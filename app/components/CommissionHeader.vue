@@ -1,6 +1,6 @@
 <template>
-    <div class="md:py-8 py-2">
-        <div class="flex sm:flex-row flex-col sm:items-end justify-between gap-4">
+    <div class="md:pt-8 pt-4">
+        <div class="flex sm:flex-row flex-col sm:items-start justify-between gap-4">
             <div class="flex items-center gap-2">
                 <UButton icon="i-lucide-arrow-left" size="lg" color="neutral" variant="ghost" @click="goBack"/>
                 <div class="flex items-center gap-1">
@@ -21,11 +21,12 @@
                     </div>
                 </div>
             </div>
-            <div class="flex items-center  gap-3">
-                <USelectMenu v-if="mode === 'monthly' && monthItems && monthItems.length" v-model="selectedMonthObject" :items="monthItems" option-attribute="label" class="w-44" />
-                <USelectMenu v-if="props.yearItems && props.yearItems.length" v-model="selectedYear" :items="props.yearItems" class="w-32" />
-                <div class="h-6 w-px bg-gray-200 dark:bg-gray-700" />
-                <UTabs :items="viewTabItems" v-model="activeViewTab" size="md" />
+            <div class="flex flex-col items-end gap-3 w-full sm:w-auto">
+                <UTabs :items="viewTabItems" v-model="activeViewTab" size="md" class="w-full sm:w-auto" />
+                <div class="flex items-center gap-3 w-full sm:w-auto">
+                    <USelectMenu v-if="mode === 'monthly' && monthItems && monthItems.length" v-model="selectedMonthObject" :items="monthItems" option-attribute="label" class="w-full sm:w-44" />
+                    <USelectMenu v-if="props.yearItems && props.yearItems.length" v-model="selectedYear" :items="props.yearItems" class="w-full sm:w-32" />
+                </div>
             </div>
         </div>
     </div>
@@ -111,10 +112,10 @@ onMounted(() => {
 })
 
 const goBack = () => {
-    if (window.history.length > 1 && window.history.state?.back) {
-        router.back()
-    } else {
+    // if (window.history.length > 1 && window.history.state?.back) {
+    //     router.back()
+    // } else {
         router.push('/')
-    }
+    // }
 }
 </script>
