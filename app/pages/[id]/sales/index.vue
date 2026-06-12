@@ -20,7 +20,7 @@
                     :is-currency="true"
                     :large="true"
                 >
-                    <div v-if="commissionData?.commission" class="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700 space-y-3">
+                    <div v-if="commissionData?.commission" class="pt-3 border-t border-gray-200 dark:border-gray-700 space-y-3">
                         <div class="flex items-center justify-between">
                             <span class="text-sm text-gray-500 dark:text-gray-400">New</span>
                             <div class="flex items-center gap-2">
