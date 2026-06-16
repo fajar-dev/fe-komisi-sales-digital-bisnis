@@ -8,111 +8,84 @@
             subtitle="Yearly sales commission summary 📊"
         />
 
-        <!-- Yearly Totals -->
-        <div class="py-4">
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-                <MetricCard
-                    label="Total Commission"
-                    icon="i-lucide-wallet"
-                    icon-color="text-info dark:text-blue-400"
-                    :value="yearlyTotals.commission"
-                    :is-currency="true"
-                    :large="true"
-                />
-                <MetricCard
-                    label="Total MRC"
-                    icon="i-lucide-trending-up"
-                    icon-color="text-emerald-500 dark:text-emerald-400"
-                    :value="yearlyTotals.mrc"
-                    :is-currency="true"
-                />
-                <MetricCard
-                    label="Total Subscription"
-                    icon="i-lucide-coins"
-                    icon-color="text-purple-500 dark:text-purple-400"
-                    :value="yearlyTotals.subscription"
-                    :is-currency="true"
-                />
-                <MetricCard
-                    label="New Customer"
-                    icon="i-lucide-user-plus"
-                    icon-color="text-amber-500 dark:text-amber-400"
-                    :value="yearlyTotals.newCustomer"
-                />
-                <MetricCard
-                    label="New Account"
-                    icon="i-lucide-users"
-                    icon-color="text-cyan-500 dark:text-cyan-400"
-                    :value="yearlyTotals.newAccount"
-                />
-            </div>
-        </div>
-        
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 py-4">
+        <!-- Yearly Summary Totals -->
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 py-4">
             <MetricCard
-                v-for="(item, index) in tableData"
-                :key="index"
-                :label="item.month"
-                icon="i-lucide-calendar"
-                icon-color="text-info dark:text-blue-400"
-                :value="item.commission"
+                label="Total Commission"
+                icon="i-lucide-wallet"
+                icon-color="text-blue-500 dark:text-blue-400"
+                :value="yearlyTotals.commission"
                 :is-currency="true"
-            >
-                <div class="mt-4 pt-3 border-t border-gray-100 dark:border-gray-800 space-y-2">
-                    <div class="flex justify-between text-sm">
-                        <span class="text-gray-500 dark:text-gray-400">MRC</span>
-                        <span class="font-semibold text-gray-900 dark:text-white">{{ formatCurrency(item.mrc) }}</span>
+            />
+            <MetricCard
+                label="Total MRC"
+                icon="i-lucide-trending-up"
+                icon-color="text-emerald-500 dark:text-emerald-400"
+                :value="yearlyTotals.mrc"
+                :is-currency="true"
+            />
+            <MetricCard
+                label="Total Subscription"
+                icon="i-lucide-coins"
+                icon-color="text-purple-500 dark:text-purple-400"
+                :value="yearlyTotals.subscription"
+                :is-currency="true"
+            />
+            <MetricCard
+                label="New Customers"
+                icon="i-lucide-user-plus"
+                icon-color="text-amber-500 dark:text-amber-400"
+                :value="yearlyTotals.newCustomer"
+            />
+            <MetricCard
+                label="New Accounts"
+                icon="i-lucide-users"
+                icon-color="text-cyan-500 dark:text-cyan-400"
+                :value="yearlyTotals.newAccount"
+            />
+        </div>
+
+        <!-- Monthly Breakdown Table -->
+        <div class="pb-6">
+            <UCard>
+                <template #header>
+                    <div>
+                        <h3 class="text-lg font-semibold">Monthly Breakdown</h3>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">Detailed monthly performance for {{ year }}</p>
                     </div>
-                    <div class="flex justify-between text-sm">
-                        <span class="text-gray-500 dark:text-gray-400">Subscription</span>
-                        <span class="font-semibold text-gray-900 dark:text-white">{{ formatCurrency(item.subscription) }}</span>
-                    </div>
-                    <div class="flex justify-between text-sm">
-                        <span class="text-gray-500 dark:text-gray-400">New Customer</span>
-                        <span class="font-semibold text-gray-900 dark:text-white">{{ item.newCustomer }}</span>
-                    </div>
-                    <div class="flex justify-between text-sm">
-                        <span class="text-gray-500 dark:text-gray-400">New Account</span>
-                        <span class="font-semibold text-gray-900 dark:text-white">{{ item.newAccount }}</span>
-                    </div>
-                </div>
-            </MetricCard>
+                </template>
+                <UTable sticky :data="tableData" :columns="monthlyColumns" class="max-h-[600px]" />
+            </UCard>
         </div>
 
         <!-- Charts Section -->
-        <div v-if="yearlyData.length > 0" class="py-2 mt-2">
-            <div class="grid grid-cols-1 gap-4">
-                <!-- Commission Trend (Area Chart) -->
-                <UCard>
-                    <template #header>
-                        <div class="flex items-center gap-2">
-                            <UIcon name="i-lucide-trending-up" class="w-5 h-5 text-info" />
-                            <div>
-                                <h3 class="text-lg font-semibold">Commission Trend</h3>
-                                <p class="text-sm text-gray-500">Monthly commission over {{ year }}</p>
-                            </div>
-                        </div>
-                    </template>
-                    <ClientOnly>
-                        <AreaChart
-                            :data="chartData"
-                            :categories="commissionCategories"
-                            :height="280"
-                            :xFormatter="xFormatter"
-                            :yFormatter="formatCompactCurrency"
-                        />
-                    </ClientOnly>
-                </UCard>
+        <div class="space-y-4 pb-4">
+            <!-- Commission Trend — full width hero chart -->
+            <UCard>
+                <template #header>
+                    <div>
+                        <h3 class="text-lg font-semibold">Commission Trend</h3>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">Monthly commission over {{ year }}</p>
+                    </div>
+                </template>
+                <ClientOnly>
+                    <AreaChart
+                        :data="chartData"
+                        :categories="commissionCategories"
+                        :height="300"
+                        :xFormatter="xFormatter"
+                        :yFormatter="formatCompactCurrency"
+                    />
+                </ClientOnly>
+            </UCard>
 
-                <!-- MRC Trend (Bar Chart) -->
+            <!-- Two-column chart row -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 <UCard>
                     <template #header>
-                        <div class="flex items-center gap-2">
-                            <UIcon name="i-lucide-bar-chart-3" class="w-5 h-5 text-emerald-500" />
-                            <div>
-                                <h3 class="text-lg font-semibold">MRC Trend</h3>
-                                <p class="text-sm text-gray-500">Monthly MRC revenue</p>
-                            </div>
+                        <div>
+                            <h3 class="text-lg font-semibold">MRC Trend</h3>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Monthly MRC revenue</p>
                         </div>
                     </template>
                     <ClientOnly>
@@ -120,22 +93,18 @@
                             :data="chartData"
                             :categories="mrcCategories"
                             :yAxis="['mrc']"
-                            :height="280"
+                            :height="260"
                             :xFormatter="xFormatter"
                             :yFormatter="formatCompactCurrency"
                         />
                     </ClientOnly>
                 </UCard>
 
-                <!-- Subscription Trend (Bar Chart) -->
                 <UCard>
                     <template #header>
-                        <div class="flex items-center gap-2">
-                            <UIcon name="i-lucide-coins" class="w-5 h-5 text-purple-500" />
-                            <div>
-                                <h3 class="text-lg font-semibold">Subscription Trend</h3>
-                                <p class="text-sm text-gray-500">Monthly subscription revenue</p>
-                            </div>
+                        <div>
+                            <h3 class="text-lg font-semibold">Subscription Trend</h3>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Monthly subscription revenue</p>
                         </div>
                     </template>
                     <ClientOnly>
@@ -143,34 +112,31 @@
                             :data="chartData"
                             :categories="subscriptionCategories"
                             :yAxis="['subscription']"
-                            :height="280"
+                            :height="260"
                             :xFormatter="xFormatter"
                             :yFormatter="formatCompactCurrency"
                         />
                     </ClientOnly>
                 </UCard>
-
-                <!-- Growth Metrics (Line Chart) -->
-                <UCard>
-                    <template #header>
-                        <div class="flex items-center gap-2">
-                            <UIcon name="i-lucide-user-plus" class="w-5 h-5 text-amber-500" />
-                            <div>
-                                <h3 class="text-lg font-semibold">Growth Metrics</h3>
-                                <p class="text-sm text-gray-500">New customers & accounts per month</p>
-                            </div>
-                        </div>
-                    </template>
-                    <ClientOnly>
-                        <LineChart
-                            :data="chartData"
-                            :categories="growthCategories"
-                            :height="280"
-                            :xFormatter="xFormatter"
-                        />
-                    </ClientOnly>
-                </UCard>
             </div>
+
+            <!-- Growth Metrics — full width -->
+            <UCard>
+                <template #header>
+                    <div>
+                        <h3 class="text-lg font-semibold">Growth Metrics</h3>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">New customers & accounts per month</p>
+                    </div>
+                </template>
+                <ClientOnly>
+                    <LineChart
+                        :data="chartData"
+                        :categories="growthCategories"
+                        :height="260"
+                        :xFormatter="xFormatter"
+                    />
+                </ClientOnly>
+            </UCard>
         </div>
     </UContainer>
 </template>
@@ -180,7 +146,8 @@ import { EmployeeService } from '~/services/employee-service'
 import { CommissionService } from '~/services/commission-service'
 import type { Employee } from '~/types/employee'
 import type { SalesCommissionYearlyData } from '~/types/sales'
-import { resolveComponent } from 'vue'
+import { h, resolveComponent } from 'vue'
+import type { TableColumn } from '@nuxt/ui'
 
 const ClientOnly = resolveComponent('ClientOnly')
 
@@ -215,6 +182,85 @@ const tableData = computed<YearlyTableRow[]>(() => {
         newAccount: item.newAccount
     }))
 })
+
+const monthlyColumns: TableColumn<YearlyTableRow>[] = [
+    {
+        accessorKey: 'month',
+        header: 'Month',
+        cell: ({ row }) => {
+            return h('span', { class: 'font-semibold text-gray-900 dark:text-white' }, row.getValue('month'))
+        }
+    },
+    {
+        accessorKey: 'commission',
+        header: 'Commission',
+        meta: { class: { th: 'text-right', td: 'text-right' } },
+        cell: ({ row }) => {
+            return h('span', { class: 'font-semibold text-blue-600 dark:text-blue-400' }, formatCurrency(Number(row.getValue('commission'))))
+        },
+        footer: ({ table }) => {
+            const total = table.getFilteredRowModel().rows.reduce((acc, row) => acc + (Number(row.original.commission) || 0), 0)
+            return h(ClientOnly, null, {
+                default: () => h('div', { class: 'text-right font-bold' }, formatCurrency(total)),
+                fallback: () => h('div', { class: 'text-right font-bold' }, formatCurrency(0))
+            })
+        }
+    },
+    {
+        accessorKey: 'mrc',
+        header: 'MRC',
+        meta: { class: { th: 'text-right', td: 'text-right' } },
+        cell: ({ row }) => {
+            return h('span', { class: 'font-medium' }, formatCurrency(Number(row.getValue('mrc'))))
+        },
+        footer: ({ table }) => {
+            const total = table.getFilteredRowModel().rows.reduce((acc, row) => acc + (Number(row.original.mrc) || 0), 0)
+            return h(ClientOnly, null, {
+                default: () => h('div', { class: 'text-right font-bold' }, formatCurrency(total)),
+                fallback: () => h('div', { class: 'text-right font-bold' }, formatCurrency(0))
+            })
+        }
+    },
+    {
+        accessorKey: 'subscription',
+        header: 'Subscription',
+        meta: { class: { th: 'text-right', td: 'text-right' } },
+        cell: ({ row }) => {
+            return h('span', { class: 'font-medium' }, formatCurrency(Number(row.getValue('subscription'))))
+        },
+        footer: ({ table }) => {
+            const total = table.getFilteredRowModel().rows.reduce((acc, row) => acc + (Number(row.original.subscription) || 0), 0)
+            return h(ClientOnly, null, {
+                default: () => h('div', { class: 'text-right font-bold' }, formatCurrency(total)),
+                fallback: () => h('div', { class: 'text-right font-bold' }, formatCurrency(0))
+            })
+        }
+    },
+    {
+        accessorKey: 'newCustomer',
+        header: 'New Customer',
+        meta: { class: { th: 'text-center', td: 'text-center font-medium' } },
+        footer: ({ table }) => {
+            const total = table.getFilteredRowModel().rows.reduce((acc, row) => acc + (Number(row.original.newCustomer) || 0), 0)
+            return h(ClientOnly, null, {
+                default: () => h('div', { class: 'text-center font-bold' }, total),
+                fallback: () => h('div', { class: 'text-center font-bold' }, 0)
+            })
+        }
+    },
+    {
+        accessorKey: 'newAccount',
+        header: 'New Account',
+        meta: { class: { th: 'text-center', td: 'text-center font-medium' } },
+        footer: ({ table }) => {
+            const total = table.getFilteredRowModel().rows.reduce((acc, row) => acc + (Number(row.original.newAccount) || 0), 0)
+            return h(ClientOnly, null, {
+                default: () => h('div', { class: 'text-center font-bold' }, total),
+                fallback: () => h('div', { class: 'text-center font-bold' }, 0)
+            })
+        }
+    }
+]
 
 const yearlyTotals = computed(() => {
     return yearlyData.value.reduce((acc, item) => ({
@@ -264,8 +310,6 @@ const formatCompactCurrency = (value: number) => {
     }).format(value)
 }
 
-
-
 const fetchEmployee = async () => {
     const employeeService = new EmployeeService()
     const employeeData = await employeeService.getEmployee(route.params.id as string)
@@ -287,3 +331,4 @@ watch(year, () => {
 
 fetchEmployee()
 </script>
+
