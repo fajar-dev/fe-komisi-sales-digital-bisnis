@@ -91,13 +91,18 @@
         <div class="py-2 mt-4">
             <UCard>
                 <template #header>
-                    <h3 class="text-lg font-semibold">Invoice</h3>
-                    <p class="text-sm text-gray-500">Monthly invoice details</p>
+                    <div class="flex items-center justify-between gap-4">
+                        <div>
+                            <h3 class="text-lg font-semibold">Invoice</h3>
+                            <p class="text-sm text-gray-500">Monthly invoice details</p>
+                        </div>
+                        <USelect v-model="statusFilter" :items="statusOptions" placeholder="Status" class="w-40" />
+                    </div>
                 </template>
                 <UTabs :items="tabItems" v-model="activeTab" variant="link" :ui="{ trigger: 'grow' }" class="gap-4 w-full">
                     <template #internal>
                         <div class="mt-4">
-                            <UTable sticky :data="invoiceData" :columns="columns" class="flex-1 max-h-[800px]" />
+                            <UTable sticky :data="filteredInvoiceData" :columns="columns" class="flex-1 max-h-[800px]" />
                         </div>
                     </template>
                     <template #resell>
@@ -112,7 +117,7 @@
                                 class="mb-4"
                             />
                             <div class="resell-table">
-                                <UTable sticky :data="resellData" :columns="resellColumns" class="flex-1 max-h-[800px]" />
+                                <UTable sticky :data="filteredResellData" :columns="resellColumns" class="flex-1 max-h-[800px]" />
                             </div>
                         </div>
                     </template>
@@ -139,6 +144,28 @@ const ClientOnly = resolveComponent('ClientOnly')
 const invoiceData = ref<InvoiceSalesInternalData[]>([])
 const resellData = ref<InvoiceSalesResellData[]>([])
 const commissionData = ref<SalesCommissionData>()
+
+const statusFilter = ref('all')
+const statusOptions = [
+    { label: 'All Status', value: 'all' },
+    { label: 'New', value: 'new' },
+    { label: 'Upgrade', value: 'upgrade' },
+    { label: 'Prorate', value: 'prorate' },
+    { label: 'Termin', value: 'termin' },
+    { label: 'Recurring', value: 'recurring' }
+]
+
+const filteredInvoiceData = computed(() =>
+    statusFilter.value === 'all'
+        ? invoiceData.value
+        : invoiceData.value.filter(row => row.status === statusFilter.value)
+)
+
+const filteredResellData = computed(() =>
+    statusFilter.value === 'all'
+        ? resellData.value
+        : resellData.value.filter(row => row.status === statusFilter.value)
+)
 
 const tabItems = [
     { label: 'Internal', slot: 'internal', value: 'internal' },

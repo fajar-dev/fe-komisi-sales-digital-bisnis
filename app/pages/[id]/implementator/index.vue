@@ -93,10 +93,15 @@
         <div class="py-2 mt-4">
             <UCard>
                 <template #header>
-                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Invoice</h3>
-                    <p class="text-sm text-gray-500">Monthly invoice details</p>
+                    <div class="flex items-center justify-between gap-4">
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Invoice</h3>
+                            <p class="text-sm text-gray-500">Monthly invoice details</p>
+                        </div>
+                        <USelect v-model="statusFilter" :items="statusOptions" placeholder="Status" class="w-40" />
+                    </div>
                 </template>
-                <UTable sticky :data="invoiceData" :columns="columns" class="flex-1 max-h-[800px]" />
+                <UTable sticky :data="filteredInvoiceData" :columns="columns" class="flex-1 max-h-[800px]" />
             </UCard>
         </div>
     </UContainer>
@@ -118,6 +123,22 @@ const ClientOnly = resolveComponent('ClientOnly')
 
 const invoiceData = ref<InvoiceImplementatorData[]>([])
 const commissionData = ref<ImplementatorCommissionData>()
+
+const statusFilter = ref('all')
+const statusOptions = [
+    { label: 'All Status', value: 'all' },
+    { label: 'New', value: 'new' },
+    { label: 'Upgrade', value: 'upgrade' },
+    { label: 'Prorate', value: 'prorate' },
+    { label: 'Termin', value: 'termin' },
+    { label: 'Recurring', value: 'recurring' }
+]
+
+const filteredInvoiceData = computed(() =>
+    statusFilter.value === 'all'
+        ? invoiceData.value
+        : invoiceData.value.filter(row => row.status === statusFilter.value)
+)
 
 const columns: TableColumn<InvoiceImplementatorData>[] = [
     {
