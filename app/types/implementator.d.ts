@@ -61,7 +61,11 @@ export interface ImplementatorCommissionData {
         total: TrendData;
     };
     mrc: TrendData;
-    subscription: TrendData;
+    subscription: {
+        new: TrendData;
+        recurring: TrendData;
+        total: TrendData;
+    };
     churnCount: TrendData;
     newAccount: TrendData;
 }
