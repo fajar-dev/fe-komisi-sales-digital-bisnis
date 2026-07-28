@@ -2,6 +2,7 @@ export interface SnapshotListQueryParams {
     search?: string;
     status?: string;
     type?: string;
+    salesId?: string;
     month?: number;
     year?: number;
     page?: number;
@@ -37,6 +38,19 @@ export interface SnapshotItem {
     commissionPercentage: number;
     commission: number;
     isAdjust: boolean;
+}
+
+export interface AccountManager {
+    employeeId: string;
+    name: string;
+    photoProfile: string;
+}
+
+export interface AccountManagerResponseData {
+    success: boolean;
+    statusCode: number;
+    message: string;
+    data: AccountManager[];
 }
 
 export interface SnapshotListMeta {

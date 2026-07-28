@@ -54,6 +54,12 @@
                             placeholder="Type"
                             class="w-36"
                         />
+                        <USelect
+                            v-model="salesId"
+                            :items="accountManagerOptions"
+                            placeholder="Account Manager"
+                            class="w-48"
+                        />
                     </div>
                 </div>
             </template>
@@ -112,6 +118,7 @@ const now = new Date()
 const search = ref('')
 const status = ref('all')
 const type = ref('all')
+const salesId = ref('all')
 const month = ref<number>(now.getMonth() + 1)
 const year = ref<number>(now.getFullYear())
 const limit = ref<number>(10)
@@ -150,6 +157,22 @@ const monthOptions = [
 
 const yearOptions = [2024, 2025, 2026, 2027, 2028, 2029, 2030]
 const limitOptions = [10, 25, 50, 100]
+
+const accountManagerOptions = ref<{ label: string; value: string }[]>([
+    { label: 'All Account Manager', value: 'all' }
+])
+
+const fetchAccountManagers = async () => {
+    try {
+        const response = await invoiceService.getAccountManagers()
+        accountManagerOptions.value = [
+            { label: 'All Account Manager', value: 'all' },
+            ...response.data.map(am => ({ label: `${am.name} (${am.employeeId})`, value: am.employeeId }))
+        ]
+    } catch {
+        // biarkan hanya opsi "All" jika gagal
+    }
+}
 
 const typeBadge = (serviceType: string) => {
     return serviceType === 'resell'
@@ -279,6 +302,7 @@ const fetchSnapshots = async () => {
             search: search.value || undefined,
             status: status.value !== 'all' ? status.value : undefined,
             type: type.value !== 'all' ? type.value : undefined,
+            salesId: salesId.value !== 'all' ? salesId.value : undefined,
             month: month.value,
             year: year.value,
             page: page.value,
@@ -306,7 +330,7 @@ watch(search, () => {
     searchTimer = setTimeout(() => { if (ready.value) resetAndFetch() }, 400)
 })
 
-watch([status, type, month, year, limit], () => {
+watch([status, type, salesId, month, year, limit], () => {
     if (ready.value) resetAndFetch()
 })
 watch(page, () => {
@@ -315,12 +339,16 @@ watch(page, () => {
 
 onMounted(async () => {
     // Set default bulan/tahun ke periode berjalan (cut-off 26-25) dari backend
+    // + ambil daftar Account Manager untuk dropdown filter
     try {
         const additionalService = new AdditionalService()
-        const response = await additionalService.getCurrentPeriod()
-        if (response?.data) {
-            month.value = response.data.month
-            year.value = response.data.year
+        const [periodRes] = await Promise.all([
+            additionalService.getCurrentPeriod(),
+            fetchAccountManagers()
+        ])
+        if (periodRes?.data) {
+            month.value = periodRes.data.month
+            year.value = periodRes.data.year
         }
     } catch {
         // fallback: tetap pakai bulan/tahun kalender saat ini

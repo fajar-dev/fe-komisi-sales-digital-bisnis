@@ -2,7 +2,7 @@
 import { apiService } from "./api-service"
 import type { InvoiceSalesInternalResponseData, InvoiceSalesResellResponseData, SalesInvoiceQueryParams } from "~/types/sales"
 import type { InvoiceImplementatorResponseData, ImplementatorInvoiceQueryParams } from "~/types/implementator"
-import type { SnapshotListQueryParams, SnapshotListResponseData } from "~/types/snapshot"
+import type { SnapshotListQueryParams, SnapshotListResponseData, AccountManagerResponseData } from "~/types/snapshot"
 
 export class InvoiceService {
     async getSnapshotList(params: SnapshotListQueryParams): Promise<SnapshotListResponseData> {
@@ -12,6 +12,19 @@ export class InvoiceService {
                     authorization: `Bearer ${useAuth().state.token}`
                 },
                 params
+            })
+            return response.data
+        } catch (error: any) {
+            handleServiceError(error)
+        }
+    }
+
+    async getAccountManagers(): Promise<AccountManagerResponseData> {
+        try {
+            const response = await apiService.client.get(`/invoice/account-manager`, {
+                headers: {
+                    authorization: `Bearer ${useAuth().state.token}`
+                }
             })
             return response.data
         } catch (error: any) {
