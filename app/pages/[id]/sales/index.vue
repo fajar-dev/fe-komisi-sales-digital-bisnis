@@ -203,7 +203,7 @@ const tabItems = [
 const activeTab = ref('internal')
 
 const resellWarningCount = computed(() => {
-    return resellData.value.filter(row => row.status !== 'recurring' && !row.modal).length
+    return resellData.value.filter(row => row.status !== 'recurring' && row.status !== 'add' && !row.modal).length
 })
 
 const columns: TableColumn<InvoiceSalesInternalData>[] = [
@@ -405,7 +405,7 @@ const resellColumns: TableColumn<InvoiceSalesResellData>[] = [
         header: 'Invoice Number',
         cell: ({ row }) => {
             const invoiceNum = row.original.invoiceNumber
-            const isWarning = row.original.status !== 'recurring' && !row.original.modal
+            const isWarning = row.original.status !== 'recurring' && row.original.status !== 'add' && !row.original.modal
             return h('div', { class: ['flex flex-col', isWarning ? 'resell-warning-marker' : ''] }, [
                 h('a', { 
                     href: `https://isx.nusa.net.id/customer.php?module=customer&pid=printNewCustomerInvoice&invoiceNum=${invoiceNum}&urut=${row.original.sequenceNumber}&new=1&proforma=0&signature=0`,
@@ -527,7 +527,7 @@ const resellColumns: TableColumn<InvoiceSalesResellData>[] = [
             }
         },
         cell: ({ row }) => {
-            if (row.original.status === 'recurring') return '-'
+            if (row.original.status === 'recurring' || row.original.status === 'add') return '-'
             return formatCurrency(Number(row.getValue('modal')))
         },
         footer: ({ table }) => {
@@ -549,7 +549,7 @@ const resellColumns: TableColumn<InvoiceSalesResellData>[] = [
             }
         },
         cell: ({ row }) => {
-            if (row.original.status === 'recurring') return '-'
+            if (row.original.status === 'recurring' || row.original.status === 'add') return '-'
             return formatCurrency(Number(row.getValue('price')))
         },
         footer: ({ table }) => {
@@ -570,7 +570,7 @@ const resellColumns: TableColumn<InvoiceSalesResellData>[] = [
             }
         },
         cell: ({ row }) => {
-            if (row.original.status === 'recurring') return '-'
+            if (row.original.status === 'recurring' || row.original.status === 'add') return '-'
             return h('div', { class: 'flex flex-col' }, [
                 h('span', { class: 'text-sm text-highlighted' }, Intl.NumberFormat('id-ID', { style: 'decimal', maximumFractionDigits: 2 }).format(row.original.margin) + '%'),
                 h('span', { class: 'text-sm' }, formatCurrency(row.original.markup))

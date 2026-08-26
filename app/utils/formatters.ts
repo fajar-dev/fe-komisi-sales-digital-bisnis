@@ -38,6 +38,10 @@ export const getStatusBadge = (status: string) => {
             return { color: 'warning', label: 'Prorate', variant: 'subtle' }
         case 'termin':
             return { color: 'warning', label: 'Termin', variant: 'subtle' }
+        case 'add':
+            return { color: 'warning', label: 'Add', variant: 'subtle' }
+        case 'setup':
+            return { color: 'primary', label: 'Setup', variant: 'subtle' }
         default:
             return { color: 'info', label: 'Recurring', variant: 'subtle' }
     }
