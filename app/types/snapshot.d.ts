@@ -34,10 +34,21 @@ export interface SnapshotItem {
     sales: SnapshotSales;
     implementator: SnapshotSales;
     subscription: number;
+    modal: number | null;
+    crossSellCount: number | null;
     mrc: number;
     commissionPercentage: number;
     commission: number;
     isAdjust: boolean;
+}
+
+export interface SnapshotUpdatePayload {
+    status?: string;
+    subscription?: number;
+    month_period?: number;
+    total_account?: number;
+    modal?: number;
+    cross_sell_count?: number;
 }
 
 export interface AccountManager {

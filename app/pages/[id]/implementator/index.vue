@@ -122,15 +122,24 @@
         <div class="py-2 mt-4">
             <UCard>
                 <template #header>
-                    <div class="flex items-center justify-between gap-4">
-                        <div>
-                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Invoice</h3>
-                            <p class="text-sm text-gray-500">Monthly invoice details</p>
-                        </div>
-                        <USelect v-model="statusFilter" :items="statusOptions" placeholder="Status" class="w-40" />
-                    </div>
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Invoice</h3>
+                    <p class="text-sm text-gray-500">Monthly invoice &amp; churn details</p>
                 </template>
-                <UTable sticky :data="filteredInvoiceData" :columns="columns" class="flex-1 max-h-[800px]" />
+                <UTabs :items="tabItems" v-model="activeTab" variant="link" :ui="{ trigger: 'grow' }" class="gap-4 w-full">
+                    <template #invoice>
+                        <div class="mt-4">
+                            <div class="flex justify-end mb-4">
+                                <USelect v-model="statusFilter" :items="statusOptions" placeholder="Status" class="w-40" />
+                            </div>
+                            <UTable sticky :data="filteredInvoiceData" :columns="columns" class="flex-1 max-h-[800px]" />
+                        </div>
+                    </template>
+                    <template #churn>
+                        <div class="mt-4">
+                            <UTable sticky :data="churnData" :columns="churnColumns" :loading="churnLoading" class="flex-1 max-h-[800px]" />
+                        </div>
+                    </template>
+                </UTabs>
             </UCard>
         </div>
     </UContainer>
@@ -144,7 +153,7 @@ import { CommissionService } from '~/services/commission-service'
 import type { Employee } from '~/types/employee'
 import { h, resolveComponent } from 'vue'
 import type { TableColumn } from '@nuxt/ui'
-import type { InvoiceImplementatorData, ImplementatorCommissionData } from '~/types/implementator'
+import type { InvoiceImplementatorData, ImplementatorCommissionData, ImplementatorChurnData } from '~/types/implementator'
 
 const UBadge = resolveComponent('UBadge')
 const UAvatar = resolveComponent('UAvatar')
@@ -152,6 +161,14 @@ const ClientOnly = resolveComponent('ClientOnly')
 
 const invoiceData = ref<InvoiceImplementatorData[]>([])
 const commissionData = ref<ImplementatorCommissionData>()
+const churnData = ref<ImplementatorChurnData[]>([])
+const churnLoading = ref(false)
+
+const tabItems = [
+    { label: 'Invoice', slot: 'invoice', value: 'invoice' },
+    { label: 'Churn', slot: 'churn', value: 'churn' }
+]
+const activeTab = ref('invoice')
 
 const statusFilter = ref('all')
 const statusOptions = [
@@ -160,7 +177,9 @@ const statusOptions = [
     { label: 'Upgrade', value: 'upgrade' },
     { label: 'Prorate', value: 'prorate' },
     { label: 'Termin', value: 'termin' },
-    { label: 'Recurring', value: 'recurring' }
+    { label: 'Recurring', value: 'recurring' },
+    { label: 'Add', value: 'add' },
+    { label: 'Setup', value: 'setup' }
 ]
 
 const filteredInvoiceData = computed(() =>
@@ -362,6 +381,65 @@ const columns: TableColumn<InvoiceImplementatorData>[] = [
     }
 ]
 
+const churnColumns: TableColumn<ImplementatorChurnData>[] = [
+    {
+        header: 'Service',
+        meta: {
+            class: {
+                th: 'min-w-[250px]',
+                td: 'min-w-[250px]'
+            }
+        },
+        cell: ({ row }) => {
+            return h('div', { class: 'flex flex-col' }, [
+                h('a', {
+                    href: `https://isx.nusa.net.id/v2/customer/service/${row.original.customerServiceId}/detail`,
+                    target: '_blank',
+                    class: ['text-info hover:underline font-semibold']
+                }, row.original.customerServiceId),
+                h('span', { class: 'text-sm whitespace-normal break-words' }, row.original.serviceName)
+            ])
+        }
+    },
+    {
+        header: 'Customer',
+        meta: {
+            class: {
+                th: 'min-w-[250px]',
+                td: 'min-w-[250px]'
+            }
+        },
+        cell: ({ row }) => {
+            return h('div', { class: 'flex flex-col' }, [
+                h('a', {
+                    href: `https://isx.nusa.net.id/customer.php?custId=${row.original.customerId}&pid=profile`,
+                    target: '_blank',
+                    class: ['text-info hover:underline font-semibold']
+                }, row.original.customerId),
+                h('span', { class: 'text-sm whitespace-normal break-words' }, row.original.customerCompany)
+            ])
+        }
+    },
+    {
+        accessorKey: 'activationDate',
+        header: 'Activation Date',
+        cell: ({ row }) => {
+            const value = row.getValue('activationDate') as string
+            if (!value) return '-'
+            return new Date(value).toLocaleString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })
+        }
+    },
+    {
+        accessorKey: 'unregDate',
+        header: 'Churn Date',
+        cell: ({ row }) => {
+            const value = row.getValue('unregDate') as string
+            if (!value) return '-'
+            return new Date(value).toLocaleString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })
+        }
+    }
+]
+
 const route = useRoute()
 const employee = ref<Employee>()  
 
@@ -389,8 +467,21 @@ const fetchInvoiceData = async () => {
     }
 }
 
+const fetchChurnData = async () => {
+    if (!year.value || !month.value) return
+    churnLoading.value = true
+    try {
+        const invoiceService = new InvoiceService()
+        const response = await invoiceService.getImplementatorChurn(route.params.id as string, { month: month.value, year: year.value })
+        churnData.value = response.data
+    } finally {
+        churnLoading.value = false
+    }
+}
+
 watch([year, month], () => {
     fetchInvoiceData()
+    fetchChurnData()
 })
 
 fetchData()

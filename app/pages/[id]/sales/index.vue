@@ -181,7 +181,8 @@ const statusOptions = [
     { label: 'Upgrade', value: 'upgrade' },
     { label: 'Prorate', value: 'prorate' },
     { label: 'Termin', value: 'termin' },
-    { label: 'Recurring', value: 'recurring' }
+    { label: 'Recurring', value: 'recurring' },
+    { label: 'Add', value: 'add' }
 ]
 
 const filteredInvoiceData = computed(() =>

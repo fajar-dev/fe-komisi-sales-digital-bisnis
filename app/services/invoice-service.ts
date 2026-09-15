@@ -1,8 +1,8 @@
 
 import { apiService } from "./api-service"
 import type { InvoiceSalesInternalResponseData, InvoiceSalesResellResponseData, SalesInvoiceQueryParams } from "~/types/sales"
-import type { InvoiceImplementatorResponseData, ImplementatorInvoiceQueryParams } from "~/types/implementator"
-import type { SnapshotListQueryParams, SnapshotListResponseData, AccountManagerResponseData } from "~/types/snapshot"
+import type { InvoiceImplementatorResponseData, ImplementatorInvoiceQueryParams, ImplementatorChurnResponseData } from "~/types/implementator"
+import type { SnapshotListQueryParams, SnapshotListResponseData, AccountManagerResponseData, SnapshotUpdatePayload } from "~/types/snapshot"
 
 export class InvoiceService {
     async getSnapshotList(params: SnapshotListQueryParams): Promise<SnapshotListResponseData> {
@@ -12,6 +12,19 @@ export class InvoiceService {
                     authorization: `Bearer ${useAuth().state.token}`
                 },
                 params
+            })
+            return response.data
+        } catch (error: any) {
+            handleServiceError(error)
+        }
+    }
+
+    async updateSnapshot(ai: number, data: SnapshotUpdatePayload): Promise<any> {
+        try {
+            const response = await apiService.client.patch(`/invoice/snapshot/${ai}`, data, {
+                headers: {
+                    authorization: `Bearer ${useAuth().state.token}`
+                }
             })
             return response.data
         } catch (error: any) {
@@ -63,6 +76,20 @@ export class InvoiceService {
     async getInvoiceImplementator(employeeId: string, params: ImplementatorInvoiceQueryParams): Promise<InvoiceImplementatorResponseData> {
         try {
             const response = await apiService.client.get(`/invoice/${employeeId}/implementator`, {
+                headers: {
+                    authorization: `Bearer ${useAuth().state.token}`
+                },
+                params
+            })
+            return response.data
+        } catch (error: any) {
+            handleServiceError(error)
+        }
+    }
+
+    async getImplementatorChurn(implementatorId: string, params: ImplementatorInvoiceQueryParams): Promise<ImplementatorChurnResponseData> {
+        try {
+            const response = await apiService.client.get(`/invoice/${implementatorId}/implementator/churn`, {
                 headers: {
                     authorization: `Bearer ${useAuth().state.token}`
                 },

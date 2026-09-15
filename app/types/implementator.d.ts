@@ -47,6 +47,23 @@ export interface InvoiceImplementatorData {
     commission: number;
 }
 
+export interface ImplementatorChurnResponseData {
+    success: boolean;
+    statusCode: number;
+    message: string;
+    data: ImplementatorChurnData[];
+}
+
+export interface ImplementatorChurnData {
+    customerServiceId: number;
+    customerId: string;
+    customerCompany: string;
+    serviceId: string;
+    serviceName: string;
+    activationDate: string;
+    unregDate: string;
+}
+
 export interface ImplementatorCommissionResponseData {
     success: boolean;
     statusCode: number;

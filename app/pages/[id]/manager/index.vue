@@ -141,6 +141,27 @@
                 <UTable sticky :data="teamData" :columns="teamColumns" class="flex-1 max-h-[800px]" @select="onSelectTeamMember" :ui="{ tr: 'cursor-pointer' }" />
             </UCard>
         </div>
+
+        <div class="py-2 mt-4">
+            <UCard>
+                <template #header>
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Invoice</h3>
+                    <p class="text-sm text-gray-500">Manager's own recurring invoices</p>
+                </template>
+                <UTabs :items="invoiceTabItems" v-model="activeInvoiceTab" variant="link" :ui="{ trigger: 'grow' }" class="gap-4 w-full">
+                    <template #internal>
+                        <div class="mt-4">
+                            <UTable sticky :data="managerInternalData" :columns="managerInternalColumns" class="flex-1 max-h-[800px]" />
+                        </div>
+                    </template>
+                    <template #resell>
+                        <div class="mt-4">
+                            <UTable sticky :data="managerResellData" :columns="managerResellColumns" class="flex-1 max-h-[800px]" />
+                        </div>
+                    </template>
+                </UTabs>
+            </UCard>
+        </div>
     </UContainer>
 </template>
 
@@ -149,9 +170,11 @@ import { AdditionalService } from '~/services/additional-service'
 import { EmployeeService } from '~/services/employee-service'
 import { TeamService } from '~/services/team-service'
 import { CommissionService } from '~/services/commission-service'
+import { InvoiceService } from '~/services/invoice-service'
 import type { Employee } from '~/types/employee'
 import type { ManagerTeamMemberData } from '~/types/team'
 import type { ManagerCommissionData } from '~/types/manager'
+import type { InvoiceSalesInternalData, InvoiceSalesResellData } from '~/types/sales'
 import { h, resolveComponent } from 'vue'
 import type { TableColumn } from '@nuxt/ui'
 
@@ -160,13 +183,22 @@ const UAvatar = resolveComponent('UAvatar')
 const ClientOnly = resolveComponent('ClientOnly')
 
 const route = useRoute()
-const employee = ref<Employee>()  
+const employee = ref<Employee>()
 
 const year = ref<number>()
 const month = ref<number>()
 
 const teamData = ref<ManagerTeamMemberData[]>([])
 const commissionData = ref<ManagerCommissionData>()
+
+const managerInternalData = ref<InvoiceSalesInternalData[]>([])
+const managerResellData = ref<InvoiceSalesResellData[]>([])
+
+const invoiceTabItems = [
+    { label: 'Internal', slot: 'internal', value: 'internal' },
+    { label: 'Resell', slot: 'resell', value: 'resell' }
+]
+const activeInvoiceTab = ref('internal')
 
 const teamColumns: TableColumn<ManagerTeamMemberData>[] = [
     {
@@ -310,6 +342,190 @@ const teamColumns: TableColumn<ManagerTeamMemberData>[] = [
     }
 ]
 
+const managerInternalColumns: TableColumn<InvoiceSalesInternalData>[] = [
+    {
+        accessorKey: 'invoiceNumber',
+        header: 'Invoice Number',
+        cell: ({ row }) => {
+            const invoiceNum = row.original.invoiceNumber
+            return h('div', { class: 'flex flex-col' }, [
+                h('a', {
+                    href: `https://isx.nusa.net.id/customer.php?module=customer&pid=printNewCustomerInvoice&invoiceNum=${invoiceNum}&urut=${row.original.sequenceNumber}&new=1&proforma=0&signature=0`,
+                    target: '_blank',
+                    class: ['text-info hover:underline font-bold']
+                }, row.original.invoiceNumber),
+                h('span', { class: 'text-sm whitespace-normal break-words' }, row.original.ai)
+            ])
+        }
+    },
+    {
+        accessorKey: 'paidDate',
+        header: 'Paid Date',
+        cell: ({ row }) => {
+            return new Date(row.getValue('paidDate')).toLocaleString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })
+        }
+    },
+    {
+        header: 'Service',
+        meta: { class: { th: 'min-w-[220px]', td: 'min-w-[220px]' } },
+        cell: ({ row }) => {
+            return h('div', { class: 'flex flex-col' }, [
+                h('a', {
+                    href: `https://isx.nusa.net.id/v2/customer/service/${row.original.customerServiceId}/detail`,
+                    target: '_blank',
+                    class: ['text-info hover:underline font-semibold']
+                }, row.original.customerServiceId),
+                h('span', { class: 'text-sm whitespace-normal break-words' }, row.original.serviceName)
+            ])
+        }
+    },
+    {
+        header: 'Customer',
+        meta: { class: { th: 'min-w-[220px]', td: 'min-w-[220px]' } },
+        cell: ({ row }) => {
+            return h('div', { class: 'flex flex-col' }, [
+                h('a', {
+                    href: `https://isx.nusa.net.id/customer.php?custId=${row.original.customerId}&pid=profile`,
+                    target: '_blank',
+                    class: ['text-info hover:underline font-semibold']
+                }, row.original.customerId),
+                h('span', { class: 'text-sm whitespace-normal break-words' }, row.original.customerCompany)
+            ])
+        }
+    },
+    {
+        header: 'Implementator',
+        cell: ({ row }) => {
+            const implementator = row.original.implementator
+            if (!implementator || !implementator.employeeId) return '-'
+            return h('div', { class: 'flex items-center gap-3' }, [
+                h(UAvatar, { src: implementator.photoProfile || undefined, size: 'lg' }),
+                h('div', undefined, [
+                    h('p', { class: 'font-medium text-highlighted' }, implementator.name),
+                    h('p', { class: '' }, implementator.employeeId)
+                ])
+            ])
+        }
+    },
+    {
+        accessorKey: 'subscription',
+        header: 'Subscription',
+        meta: { class: { th: 'text-right', td: 'text-right font-medium' } },
+        cell: ({ row }) => formatCurrency(Number(row.getValue('subscription')) || 0),
+        footer: ({ table }) => {
+            const rows = table.getFilteredRowModel().rows
+            const total = rows.reduce((acc, row) => acc + (Number(row.original.subscription) || 0), 0)
+            return h(ClientOnly, null, {
+                default: () => h('div', { class: 'text-right font-bold' }, formatCurrency(total)),
+                fallback: () => h('div', { class: 'text-right font-bold' }, formatCurrency(0))
+            })
+        }
+    },
+    {
+        header: 'Commission',
+        meta: { class: { th: 'text-right', td: 'text-right font-medium' } },
+        cell: ({ row }) => {
+            return h('div', { class: 'flex flex-col' }, [
+                h('span', { class: 'text-sm text-highlighted' }, Intl.NumberFormat('id-ID', { style: 'decimal' }).format(row.original.commissionPercentage) + '%'),
+                h('span', { class: 'text-sm' }, formatCurrency(row.original.commission))
+            ])
+        },
+        footer: ({ table }) => {
+            const rows = table.getFilteredRowModel().rows
+            const total = rows.reduce((acc, row) => acc + (Number(row.original.commission) || 0), 0)
+            return h(ClientOnly, null, {
+                default: () => h('div', { class: 'text-right font-bold' }, formatCurrency(total)),
+                fallback: () => h('div', { class: 'text-right font-bold' }, formatCurrency(0))
+            })
+        }
+    }
+]
+
+const managerResellColumns: TableColumn<InvoiceSalesResellData>[] = [
+    {
+        accessorKey: 'invoiceNumber',
+        header: 'Invoice Number',
+        cell: ({ row }) => {
+            const invoiceNum = row.original.invoiceNumber
+            return h('div', { class: 'flex flex-col' }, [
+                h('a', {
+                    href: `https://isx.nusa.net.id/customer.php?module=customer&pid=printNewCustomerInvoice&invoiceNum=${invoiceNum}&urut=${row.original.sequenceNumber}&new=1&proforma=0&signature=0`,
+                    target: '_blank',
+                    class: ['text-info hover:underline font-bold']
+                }, row.original.invoiceNumber),
+                h('span', { class: 'text-sm whitespace-normal break-words' }, row.original.ai)
+            ])
+        }
+    },
+    {
+        accessorKey: 'paidDate',
+        header: 'Paid Date',
+        cell: ({ row }) => {
+            return new Date(row.getValue('paidDate')).toLocaleString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })
+        }
+    },
+    {
+        header: 'Service',
+        meta: { class: { th: 'min-w-[220px]', td: 'min-w-[220px]' } },
+        cell: ({ row }) => {
+            return h('div', { class: 'flex flex-col' }, [
+                h('a', {
+                    href: `https://isx.nusa.net.id/v2/customer/service/${row.original.customerServiceId}/detail`,
+                    target: '_blank',
+                    class: ['text-info hover:underline font-semibold']
+                }, row.original.customerServiceId),
+                h('span', { class: 'text-sm whitespace-normal break-words' }, row.original.serviceName)
+            ])
+        }
+    },
+    {
+        header: 'Customer',
+        meta: { class: { th: 'min-w-[220px]', td: 'min-w-[220px]' } },
+        cell: ({ row }) => {
+            return h('div', { class: 'flex flex-col' }, [
+                h('a', {
+                    href: `https://isx.nusa.net.id/customer.php?custId=${row.original.customerId}&pid=profile`,
+                    target: '_blank',
+                    class: ['text-info hover:underline font-semibold']
+                }, row.original.customerId),
+                h('span', { class: 'text-sm whitespace-normal break-words' }, row.original.customerCompany)
+            ])
+        }
+    },
+    {
+        accessorKey: 'subscription',
+        header: 'Subscription',
+        meta: { class: { th: 'text-right', td: 'text-right font-medium' } },
+        cell: ({ row }) => formatCurrency(Number(row.getValue('subscription')) || 0),
+        footer: ({ table }) => {
+            const rows = table.getFilteredRowModel().rows
+            const total = rows.reduce((acc, row) => acc + (Number(row.original.subscription) || 0), 0)
+            return h(ClientOnly, null, {
+                default: () => h('div', { class: 'text-right font-bold' }, formatCurrency(total)),
+                fallback: () => h('div', { class: 'text-right font-bold' }, formatCurrency(0))
+            })
+        }
+    },
+    {
+        header: 'Commission',
+        meta: { class: { th: 'text-right', td: 'text-right font-medium' } },
+        cell: ({ row }) => {
+            return h('div', { class: 'flex flex-col' }, [
+                h('span', { class: 'text-sm text-highlighted' }, Intl.NumberFormat('id-ID', { style: 'decimal' }).format(row.original.commissionPercentage) + '%'),
+                h('span', { class: 'text-sm' }, formatCurrency(row.original.commission))
+            ])
+        },
+        footer: ({ table }) => {
+            const rows = table.getFilteredRowModel().rows
+            const total = rows.reduce((acc, row) => acc + (Number(row.original.commission) || 0), 0)
+            return h(ClientOnly, null, {
+                default: () => h('div', { class: 'text-right font-bold' }, formatCurrency(total)),
+                fallback: () => h('div', { class: 'text-right font-bold' }, formatCurrency(0))
+            })
+        }
+    }
+]
+
 const onSelectTeamMember = (event: any, row: any) => {
     const data = row?.original || row
     if (data?.employeeId) {
@@ -338,8 +554,22 @@ const fetchTeamData = async () => {
     }
 }
 
+const fetchManagerInvoiceData = async () => {
+    if (!year.value || !month.value) return
+    const invoiceService = new InvoiceService()
+    const params = { month: month.value, year: year.value }
+
+    // Invoice pribadi manager sendiri (sales_id = manager), hanya status recurring
+    const internalResponse = await invoiceService.getInvoiceInternal(route.params.id as string, params)
+    managerInternalData.value = internalResponse.data.filter(row => row.status === 'recurring')
+
+    const resellResponse = await invoiceService.getInvoiceResell(route.params.id as string, params)
+    managerResellData.value = resellResponse.data.filter(row => row.status === 'recurring')
+}
+
 watch([year, month], () => {
     fetchTeamData()
+    fetchManagerInvoiceData()
 })
 
 fetchData()

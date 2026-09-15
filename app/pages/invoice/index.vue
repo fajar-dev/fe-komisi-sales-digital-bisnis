@@ -95,6 +95,43 @@
                 </div>
             </template>
         </UCard>
+
+        <UModal v-model:open="editModalOpen" :ui="{ overlay: 'bg-white/45 dark:bg-black/45 backdrop-blur-xs' }">
+            <template #content>
+                <div class="p-5">
+                    <div class="space-y-1 mb-4">
+                        <h3 class="text-lg font-semibold">Edit Snapshot</h3>
+                        <p class="text-sm text-gray-500">AI: {{ editingItem?.ai }} — {{ editingItem?.customerCompany }}</p>
+                    </div>
+
+                    <div class="space-y-4">
+                        <UFormField label="Status">
+                            <USelect v-model="editForm.status" :items="editStatusOptions" class="w-full" />
+                        </UFormField>
+                        <UFormField label="Subscription">
+                            <UInput v-model.number="editForm.subscription" type="number" class="w-full" />
+                        </UFormField>
+                        <UFormField label="Month Period">
+                            <UInput v-model.number="editForm.month_period" type="number" step="0.01" class="w-full" />
+                        </UFormField>
+                        <UFormField label="Total Account">
+                            <UInput v-model.number="editForm.total_account" type="number" class="w-full" />
+                        </UFormField>
+                        <UFormField v-if="editingItem?.serviceType === 'resell'" label="Modal">
+                            <UInput v-model.number="editForm.modal" type="number" class="w-full" />
+                        </UFormField>
+                        <UFormField v-if="editingItem?.serviceType === 'internal'" label="Cross Sell Count">
+                            <UInput v-model.number="editForm.cross_sell_count" type="number" class="w-full" />
+                        </UFormField>
+                    </div>
+
+                    <div class="flex justify-end gap-2 mt-6">
+                        <UButton label="Cancel" color="neutral" variant="subtle" :disabled="saving" @click="editModalOpen = false" />
+                        <UButton label="Save" color="primary" variant="solid" :loading="saving" @click="submitEdit" />
+                    </div>
+                </div>
+            </template>
+        </UModal>
     </div>
 </template>
 
@@ -103,10 +140,11 @@ import { h, resolveComponent } from 'vue'
 import type { TableColumn } from '@nuxt/ui'
 import { InvoiceService } from '~/services/invoice-service'
 import { AdditionalService } from '~/services/additional-service'
-import type { SnapshotItem, SnapshotListMeta } from '~/types/snapshot'
+import type { SnapshotItem, SnapshotListMeta, SnapshotUpdatePayload } from '~/types/snapshot'
 
 const UBadge = resolveComponent('UBadge')
 const UAvatar = resolveComponent('UAvatar')
+const UButton = resolveComponent('UButton')
 
 const invoiceService = new InvoiceService()
 
@@ -131,7 +169,19 @@ const statusOptions = [
     { label: 'Upgrade', value: 'upgrade' },
     { label: 'Prorate', value: 'prorate' },
     { label: 'Termin', value: 'termin' },
-    { label: 'Recurring', value: 'recurring' }
+    { label: 'Recurring', value: 'recurring' },
+    { label: 'Add', value: 'add' },
+    { label: 'Setup', value: 'setup' }
+]
+
+const editStatusOptions = [
+    { label: 'New', value: 'new' },
+    { label: 'Upgrade', value: 'upgrade' },
+    { label: 'Prorate', value: 'prorate' },
+    { label: 'Termin', value: 'termin' },
+    { label: 'Recurring', value: 'recurring' },
+    { label: 'Add', value: 'add' },
+    { label: 'Setup', value: 'setup' }
 ]
 
 const typeOptions = [
@@ -292,6 +342,20 @@ const columns: TableColumn<SnapshotItem>[] = [
             if (!row.original.isAdjust) return h('span', { class: 'text-gray-400' }, '-')
             return h(UBadge, { color: 'warning', variant: 'subtle' }, () => 'Adjusted')
         }
+    },
+    {
+        id: 'actions',
+        header: 'Actions',
+        meta: { class: { th: 'text-center', td: 'text-center' } },
+        cell: ({ row }) => {
+            return h(UButton, {
+                icon: 'i-lucide-pencil',
+                color: 'neutral',
+                variant: 'ghost',
+                size: 'sm',
+                onClick: () => openEdit(row.original)
+            })
+        }
     }
 ]
 
@@ -357,4 +421,37 @@ onMounted(async () => {
     await fetchSnapshots()
     ready.value = true
 })
+
+const toast = useToast()
+
+const editModalOpen = ref(false)
+const editingItem = ref<SnapshotItem | null>(null)
+const saving = ref(false)
+const editForm = ref<SnapshotUpdatePayload>({})
+
+const openEdit = (item: SnapshotItem) => {
+    editingItem.value = item
+    editForm.value = {
+        status: item.status,
+        subscription: item.subscription,
+        month_period: Number(item.monthPeriod),
+        total_account: item.totalAccount,
+        modal: item.modal ?? undefined,
+        cross_sell_count: item.crossSellCount ?? undefined
+    }
+    editModalOpen.value = true
+}
+
+const submitEdit = async () => {
+    if (!editingItem.value) return
+    saving.value = true
+    try {
+        await invoiceService.updateSnapshot(editingItem.value.ai, editForm.value)
+        toast.add({ title: 'Snapshot updated successfully', color: 'success' })
+        editModalOpen.value = false
+        await fetchSnapshots()
+    } finally {
+        saving.value = false
+    }
+}
 </script>
